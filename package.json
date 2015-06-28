@@ -1,7 +1,8 @@
 {
   "devDependencies": {
-    "make-lint-es6": "^1.0.3",
-    "babel": "^5.4.4"
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-watch": "^4.2.4"
   },
   "dependencies": {
     "es6-promisify": "^2.0.0"
