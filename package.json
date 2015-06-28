@@ -5,6 +5,7 @@
     "gulp-watch": "^4.2.4"
   },
   "dependencies": {
-    "es6-promisify": "^2.0.0"
+    "es6-promisify": "^2.0.0",
+    "teleapiwrapper": "^0.8.0"
   }
 }
