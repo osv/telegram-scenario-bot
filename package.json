@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "make-lint-es6": "^1.0.3",
+    "babel": "^5.4.4"
+  },
+  "dependencies": {
+    "es6-promisify": "^2.0.0"
+  }
+}

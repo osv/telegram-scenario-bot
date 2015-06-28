@@ -1,0 +1,14 @@
+{
+  "libs": [
+    "ecma5",
+    "underscore",
+    "ecma6"
+  ],
+  "plugins": {
+    "complete_strings": {},
+    "node": {},
+    "doc_comment": {
+      "fullDocs": true
+    }
+  }
+}
