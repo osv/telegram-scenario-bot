@@ -1,13 +1,50 @@
 {
+  "name": "todo",
+  "version": "0.0.1",
+  "description": "Framework for Telegram bot",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "gulp",
+    "build": "gulp build",
+    "coverage": "gulp coverage",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "es6",
+    "node"
+  ],
+  "author": "Olexandr Sydorchuk",
+  "license": "MIT",
   "devDependencies": {
+    "chai": "^3.0.0",
+    "del": "^1.1.1",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
-    "gulp-watch": "^4.2.4"
+    "gulp-istanbul": "^0.10.0",
+    "gulp-load-plugins": "^1.0.0-rc.1",
+    "gulp-mocha": "^2.1.2",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.0.1",
+    "isparta": "^3.0.3",
+    "mkdirp": "^0.5.1",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0"
   },
   "dependencies": {
     "es6-promisify": "^2.0.0",
     "memory-cache": "^0.1.4",
     "teleapiwrapper": "^0.8.0",
     "underscore": "^1.8.3"
+  },
+  "nodeBoilerplateOptions": {
+    "babel": {
+      "stage": 0
+    },
+    "mochaGlobals": [
+      "stub",
+      "spy",
+      "expect"
+    ]
   }
 }

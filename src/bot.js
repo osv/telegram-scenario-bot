@@ -1,8 +1,8 @@
 'use strict';
 /* ddd */
-import JobQueue from '../lib/job-queue.js';
-import BotApi from '../lib/telegram-api-promisified.js';
-import StateHolder from '../lib/state-holder.js';
+import JobQueue from './job-queue.js';
+import BotApi from './telegram-api-promisified.js';
+import StateHolder from './state-holder.js';
 
 import _ from 'underscore';
 
