@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "es6-promisify": "^2.0.0",
+    "memory-cache": "^0.1.4",
     "teleapiwrapper": "^0.8.0",
     "underscore": "^1.8.3"
   }
