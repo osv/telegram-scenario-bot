@@ -1,7 +1,7 @@
 'use strict';
 
-/*
- * Promisify prototype functions of teleapiwrapper.BotAPI
+/**
+ * @module telegram-api-promisified
  */
 
 var promisify = require('es6-promisify'),
@@ -29,4 +29,15 @@ for (let i = 0; i < methods.length; i++) {
   BotApi.prototype[method] = promisify(orig);
 }
 
+/**
+ * This module promisify prototype functions of teleapiwrapper.BotAPI
+ *
+ * @example
+ * import BotApi from './lib/telegram-api-promisified.js';
+ *
+ * var bot = new BotApi('123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+ * bot.getMe()
+ *   .then((data) => console.log(data))
+ *   .catch((e) => console.log('err' + e));
+ */
 module.exports = BotApi;
