@@ -152,8 +152,6 @@ JobQueue.prototype = {
   },
 
   _callWorker: async function(data) {
-    console.log('>> call worker <<');
-
     var worker = this._worker_fn;
     if (! _.isFunction(worker)) {
       throw new Error('You must set worker');
