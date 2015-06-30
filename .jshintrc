@@ -3,7 +3,7 @@
   "quotmark "    : "single",
 
   "bitwise"       : true,
-  "camelcase"     : true,
+  "camelcase"     : false,
   "eqeqeq"        : true,
   "forin"         : false,
   "immed"         : true,
