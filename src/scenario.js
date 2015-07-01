@@ -70,11 +70,33 @@ Scenario.prototype = {
     }
     let sc = scenario;
 
+    // key of scenario must be valid type
     for (let prop in scenario) {
       if (! _.has(schema, prop)) {
         throw Error(`Scenario invalid: Unexpected property "${prop}". Path: ${path}`);
+        } else {
+          let valid = false,
+              prop_value = scenario[prop];
+          for (let type of schema[prop]) {
+            if (type === 'string' && _.isString(prop_value)) {
+              valid = true; break;
+            }
+            else if (type === 'array' && _.isArray(prop_value)) {
+              valid = true; break;
+            }
+            else if (type === 'function' && _.isFunction(prop_value)) {
+              valid = true; break;
+            }
+            else if (type === 'boolean' && _.isBoolean(prop_value)) {
+              valid = true; break;
+            }
+            else if (type === 'number' && _.isNumber(prop_value)) {
+              valid = true; break;
+            }
+          }
+          if (! valid)
+            throw Error(`Scenario invalid: Property "${prop}" must be one of ${ schema[prop].join(', ') }. Path: ${path}`);
       }
-
     }
 
     return sc;

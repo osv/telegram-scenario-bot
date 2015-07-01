@@ -41,9 +41,7 @@ describe('Scenario validator', function() {
   });
 
   it('expect pass when known only known property have', function() {
-    let scenario = {
-      text: "baz"
-    };
+    let scenario = { text: "baz" };
     expect(Scenario.prototype.validate).called(scenario).to.not.throw();
 
     // other known
@@ -54,4 +52,70 @@ describe('Scenario validator', function() {
     scenario.baz = true;
     expect(Scenario.prototype.validate).called(scenario).to.throw();
   });
+
+  it('expect valid "string" type of schema keys', function() {
+    let scenario_ok = { text: "baz" };
+    let schema = { text: ['string'] };
+    expect(Scenario.prototype.validate).called(scenario_ok, '/', schema)
+      .to.not.throw();
+
+    let scenario_invalide = { text: [1,2,3] };
+    expect(Scenario.prototype.validate).called(scenario_invalide, '/', schema)
+      .to.throw();
+  });
+
+  it('expect valid "boolean" type of schema keys', function() {
+    let schema = { text: ['boolean'] };
+
+    let scenario_ok = {
+      text: false
+    };
+    expect(Scenario.prototype.validate).called(scenario_ok, '/', schema)
+      .to.not.throw();
+
+    let scenario_invalide = {
+      text: [1,2,3]
+    };
+    expect(Scenario.prototype.validate).called(scenario_invalide, '/', schema)
+      .to.throw();
+  });
+
+  it('expect valid "array" type of schema keys', function() {
+    let schema = { text: ['array'] };
+
+    let scenario_ok = { text: [1,2,3] };
+    expect(Scenario.prototype.validate).called(scenario_ok, '/', schema)
+      .to.not.throw();
+
+    let scenario_invalide = { text: "foobar" };
+    expect(Scenario.prototype.validate).called(scenario_invalide, '/', schema)
+      .to.throw();
+  });
+
+  it('expect valid "function" type of schema keys', function() {
+    let schema = { text: ['function'] };
+
+    let scenario_ok = {
+      text: function() {}
+    };
+    expect(Scenario.prototype.validate).called(scenario_ok, '/', schema)
+      .to.not.throw();
+
+    let scenario_invalide = { text: 123 };
+    expect(Scenario.prototype.validate).called(scenario_invalide, '/', schema)
+      .to.throw();
+  });
+
+  it('expect valid "number" type of schema keys', function() {
+    let schema = { text: ['number'] };
+
+    let scenario_ok = { text: 999.9 };
+    expect(Scenario.prototype.validate).called(scenario_ok, '/', schema)
+      .to.not.throw();
+
+    let scenario_invalide = { text: "foobar" };
+    expect(Scenario.prototype.validate).called(scenario_invalide, '/', schema)
+      .to.throw();
+  });
+
 });
