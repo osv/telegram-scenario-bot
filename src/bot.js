@@ -47,7 +47,7 @@ Bot.prototype = {
     while (! this._messages.length) {
       console.log('getUpdates..');
       let offset = this.offset +1,
-          updates = await this._tel_api.getUpdates(offset, 100, 60);
+          updates = await this._tel_api.getUpdates(offset, 100, 1800);
       this._messages = updates.result;
     }
     let msg = this._messages.shift();
@@ -64,7 +64,15 @@ Bot.prototype = {
     console.log('Processing data...:', data);
     await api.sendChatAction(chat_id, 'typing');
     await sleep(300);
-    await api.sendMessage(chat_id, 'Hello' + msg.text);
+    await api.sendMessage(chat_id, `Hello, msgid: ${msg.text}\n /4 df sdfdsd fsdASDFGH A\n/2 dfsdf`,
+                          true, 0,
+                          {
+                            keyboard: [
+                              ['yes', 'no', 'more'],
+                              [ 'cancel'],
+                            ],
+                            resize_keyboard: true
+                          });
   },
 };
 
