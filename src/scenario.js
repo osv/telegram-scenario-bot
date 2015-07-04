@@ -63,10 +63,14 @@ var _ = require('underscore');
  * @param {object} api - hash of known methods that may be used by "<% XYZ %>"
  */
 function Validator(api={}) {
-  this.api = api;
+  this.setApi(api);
 }
 
 Validator.prototype = {
+  setApi(api) {
+    this.api = api;
+  },
+
   isFunction(value) {
     if (_.isFunction(value)) {
       return true;
@@ -200,44 +204,74 @@ Validator.prototype = {
 
 };
 
-function Scenario(scenario) {
-  this._scenario = this.validate(scenario);
+function Scenario(api, scenario) {
+  var v                   = new Validator(api),
+      scenario_schema     = {},
 
-}
+      object              = v.object.bind(v),
+      fun                 = v.object.bind(v),
+      boolean             = v.boolean.bind(v),
+      number              = v.number.bind(v),
+      string              = v.string.bind(v),
+      oneof               = v.oneOf.bind(v),
+      array               = v.array.bind(v),
+      array_of_str        = array.bind(v, [string]),
+      one_of_str_or_array = oneof.bind(v,[string, array_of_str]),
+      scenario_validator  = object.bind(v,
+                                        () => scenario_schema, // schema
+                                        [] //required
+                                       );
 
-const SCHEMA = {
-  text: ["function", "string"],
-  typing: ["boolean", "string", "function"],
-};
+  scenario_schema = {
+    typing             : boolean,
+    uploading_photo    : boolean,
+    recording_video    : boolean,
+    uploading_video    : boolean,
+    recording_audio    : boolean,
+    uploading_audio    : boolean,
+    uploading_document : boolean,
+    finding_location   : boolean,
 
-Scenario.prototype = {
+    text               : string,
 
-  /**
-   * Validate telegram menu scenario
-   * @param {object} scenario
-   * @param {string} [path]
-   * @param {object} [SCHEMA]
-   * @returns {}
-   * @throws {}
-   */
-  validate(scenario, path='/', schema=SCHEMA) {
-    if (! _.isObject(scenario)) {
-      throw Error('Scenario must be object');
-    }
-    let sc = scenario;
+    menu               : one_of_str_or_array,
 
-    // key of scenario must be valid type
-    for (let prop in scenario) {
-      if (! _.has(schema, prop)) {
-        throw Error(`Scenario invalid: Unexpected property "${prop}". Path: ${path}`);
-        } else {
-          let prop_value = scenario[prop];
-          this._validateType(prop_value, schema[prop]);
+    before             : fun,
+    action             : fun,
+    after              : fun,
+
+    commands: function(key_name, value) {
+      for(let command_name in value) {
+        let sub_scenario = value[command_name];
+
+        // nesting
+        scenario_validator(`${key_name}."${command_name}"`, sub_scenario);
       }
     }
+  };
 
-    return sc;
+  this.validator = v;
+  this.setApi(api);
+  this.scenario_validator = scenario_validator;
+
+  if (scenario) {
+    this.setScenario(scenario);
+  }
+}
+
+Scenario.prototype = {
+  setApi(api) {
+    this.validator.setApi(api);
   },
+
+  setScenario(scenario) {
+    this.validate(scenario);
+    this.scenario = scenario;
+  },
+
+  validate(scenario) {
+    this.scenario_validator('scenario', scenario);
+  }
 };
 
 export {Scenario, Validator};

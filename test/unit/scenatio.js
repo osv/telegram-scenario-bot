@@ -174,6 +174,7 @@ describe("validators function:", function() {
         string                       = v.string.bind(v),
         number                       = v.number.bind(v),
         array_of_str                 = array.bind(v, [string]),
+        one_of_str_or_array          = v.oneOf.bind(v,[string, array_of_str]),
         array_of_array_of_str        = array.bind(v, [array_of_str]),
         array_of_array_of_str_or_num = array.bind(v, [array.bind(v, [string, number])]),
         array_of_str_or_array_of_str = v.array.bind(v, [string, array_of_str]);
@@ -211,6 +212,12 @@ describe("validators function:", function() {
                                                   [ "back"       ],
                                                   "cancel",
                                                 ]).to.not.throw();
+
+    expect(one_of_str_or_array).called('foo1', ["it1", "it2"]).to.not.throw();
+    expect(one_of_str_or_array).called('foo1', []).to.not.throw();
+    expect(one_of_str_or_array).called('foo1', "").to.not.throw();
+    expect(one_of_str_or_array).called('foo1', true).to.throw('None of validators');
+
   });
 
   it('"object" expect value to be not array but object only', function() {
@@ -357,17 +364,88 @@ describe("validators function:", function() {
 describe('Scenario class', function(){
   // it('should fail when asserting false', function(){
   //   false.should.equal(true);
-  // });
-  it('should validate arg1 in constructor', function(){
-    sinon.stub(Scenario.prototype, 'validate', function(d) {
-      return d;
+  // })
+  describe('Internal shema validator' ,function() {
+    it('Constructor', function() {
+      expect(() => { new Scenario(); })
+        .to.not.throw();
     });
 
-    let s = new Scenario('test');
+    it('setApi()', function() {
+      expect(() => {
+        var s = new Scenario();
+        s.setApi({ foo: 1});
+        s.validate({
+          typing: "<% foo %>"
+        });
+      })
+        .to.not.throw();
+    });
 
-    s.validate.calledOnce.should.be.true;
-    s._scenario.should.to.be.equal('test');
+    it('setScenario() should set propert .scenario', function() {
+      expect(() => {
+        var scenario_templ = {
+          typing: true
+        };
+        var s = new Scenario();
+        s.setScenario(scenario_templ);
 
-    Scenario.prototype.validate.restore();
+        s.scenario.should.to.be.equal(scenario_templ);
+      })
+        .to.not.throw();
+    });
+
+    it('validate method', function() {
+      expect(() => {
+        var s = new Scenario();
+        s.validate({
+          typing: true
+        });
+      })
+        .to.not.throw();
+    });
+
+    it('Basic schema', function(){
+      let scenario1 = {
+        typing: true,
+      };
+
+      expect(() => { new Scenario({}, scenario1); })
+        .to.not.throw();
+
+      let scenario2 = {
+        fail: true
+      };
+
+      expect(() => { new Scenario({}, scenario2); })
+        .to.throw('object use unknown keys: ["fail"]');
+    });
+
+    it('Scenario. "commands"', function() {
+      let scenario1 = {
+        typing: true,
+        commands: {
+          "/help": {
+            typing: true
+          }
+        }
+      };
+
+      expect(() => { new Scenario({}, scenario1); })
+        .to.not.throw();
+
+      let scenario2= {
+        typing: true,
+        commands: {
+          "/help": {
+            typing: 123 // <- fail here
+          }
+        }
+      };
+
+      expect(() => { new Scenario({}, scenario2); })
+        .to.throw('"scenario.commands."/help".typing" must be boolean or function');
+    });
   });
+
 });
