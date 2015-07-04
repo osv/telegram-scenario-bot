@@ -5,6 +5,23 @@ import {Scenario, Validator} from '../../src/scenario.js';
 chai.should();
 
 describe("validators function:", function() {
+  it('"fun" expect function or string <% foo %>', function() {
+    let api = {foo: () => {}},
+        v = new Validator(api),
+        fun = v.fun.bind(v);
+
+    expect(fun).called('foo', true).to.throw('must be function');
+    expect(fun).called('foo', false).to.throw('must be function');
+
+    expect(fun).called('foo', 123).to.throw('must be function');
+
+    expect(fun).called('foo', () => {}).not.to.throw();
+    expect(fun).called('foo', "<% foo %>").to.not.throw();
+
+    expect(fun).called('foo', "<% foo %>baz").to.throw();
+    expect(fun).called('foo', "<% bar %>").to.throw('undef');
+  });
+
   it('"boolean" expect to be boolean, string "<% foo %>" or function', function() {
     let api = {foo: () => {}},
         v = new Validator(api);

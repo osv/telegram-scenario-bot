@@ -85,6 +85,11 @@ Validator.prototype = {
     return false;
   },
 
+  fun(key_name, value) {
+    if (! this.isFunction(value))
+      throw Error(`"${key_name}" must be function or string api call "<% fooBar %>"`);
+  },
+
   boolean(key_name, value) {
     if (! _.isBoolean(value) &&
         ! this.isFunction(value))
