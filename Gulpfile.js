@@ -23,6 +23,7 @@ gulp.task('build', ['clean'], function() {
   mkdirp.sync(destinationFolder);
   return gulp.src(['src/**/*.js', '!src/**/.*#*'])
     .pipe($.plumber())
+    .pipe($.babel())
     .pipe(gulp.dest(destinationFolder));
 });
 
