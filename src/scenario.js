@@ -71,6 +71,10 @@ Validator.prototype = {
     this.api = api;
   },
 
+  getApi() {
+    return this.api;
+  },
+
   isFunction(value) {
     if (_.isFunction(value)) {
       return true;
@@ -263,7 +267,7 @@ Scenario.prototype = {
   validatorApi(api) {
     let validator = this._validator;
     if (_.isUndefined(api)) {
-      return validator;
+      return validator.getApi();
     } else {
       validator.setApi(api);
       return this;
