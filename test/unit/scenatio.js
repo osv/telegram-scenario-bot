@@ -506,7 +506,7 @@ describe('Scenario class', function(){
           },
           script_quit = this.script_quit = {
             name: "quit",
-            text: "Quit?",
+            reply: "Quit?",
             menu: [
               ['yes', 'no'],
               ['cancel']
@@ -522,13 +522,13 @@ describe('Scenario class', function(){
           },
           script = this.script = {
             name: "root",
-            text: "hello",
+            reply: "hello",
             commands: {
               '/quit-force' : script_quit_f,
               '/quit'       : script_quit,
               '.': {
                 name: 'default',
-                text: 'Unrecognized command',
+                reply: 'Unrecognized command',
               }
             },
           },

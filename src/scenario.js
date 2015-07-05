@@ -265,7 +265,7 @@ function Scenario(api, scenario) {
     uploading_document : boolean,
     finding_location   : boolean,
 
-    text               : string,
+    reply              : string,
 
     menu               : one_of_str_or_array,
 
