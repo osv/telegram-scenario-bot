@@ -208,6 +208,13 @@ Validator.prototype = {
 
 };
 
+/**
+ * Create scenario container.
+ * @param {object} [api] - api that may used by scenario using '<% ... %>' notation
+ * @param {object} [scenario] - scenario object
+ * @throws {Error} if fail to validate scenario
+ * @constructor
+ */
 function Scenario(api, scenario) {
   var v                   = new Validator(api),
       scenario_schema     = {},
@@ -279,6 +286,11 @@ function Scenario(api, scenario) {
 }
 
 Scenario.prototype = {
+  /**
+   * Set or get api. If set, return this
+   * @param {object} [new_api]
+   * @return {old_api|this}
+   */
   api(new_api) {
     let validator = this._validator;
     if (_.isUndefined(new_api)) {
@@ -289,6 +301,12 @@ Scenario.prototype = {
     }
   },
 
+  /**
+   * Set or get scenario. If set, return this.
+   * You must set before, otherwise validation will fail if used unknown api in <% %>
+   * @param {object} [new_scenario]
+   * @return {old_api|this}
+   */
   scenario(new_scenario) {
     if (_.isUndefined(new_scenario)) {
       return this._scenario;
@@ -303,6 +321,35 @@ Scenario.prototype = {
     this._scenario_validator('scenario', scenario);
   },
 
+  /**
+   * Get scenario by path
+   * @param {string} path
+   * @throws {Error} if not found scenario
+   * @return {scenario_obj}
+   * @example
+   * var s = new Scenario({}, {
+   *   name: 'myscen',
+   *   commands: {
+   *     '/start': {
+   *     name: 'start-command'
+   *     }
+   *   }
+   * })
+   *
+   * s.getScenario(); // myscen
+   * s.getScenario('/'); // myscen
+   * s.getScenario('/myscen'); // myscen
+   * s.getScenario('/myscen/'); // myscen
+   * s.getScenario('/myscen/start-command');
+   * // start-command
+   * //  {
+   * //    '/start': {
+   * //       name: 'start-command'
+   * //  }
+   *
+   * s.getScenario('/myscen/fail-command'); // throw
+
+   */
   getScenario(path) {
     if (_.isUndefined(path)) {
       return this._scenario;
