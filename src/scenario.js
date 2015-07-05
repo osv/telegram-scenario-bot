@@ -225,10 +225,30 @@ function Scenario(api, scenario) {
       scenario_validator  = object.bind(v,
                                         () => scenario_schema, // schema
                                         ['name'] //required
-                                       );
+                                       ),
+      // other special validators
+      name = function(key_name, value) {
+        if (! _.isString(value) ||
+            _.isEmpty(value)) {
+          throw Error(`"${key_name}" must be a string`);
+        }
+
+        if(value.match('[/<>]')) {
+          throw Error(`"chars ['/' '<' '>'] not allowed in "${key_name}"`);
+        }
+      },
+      command = function(key_name, value) {
+        for(let command_name in value) {
+          let sub_scenario = value[command_name];
+
+          // nesting
+          scenario_validator(`${key_name}."${command_name}"`, sub_scenario);
+        }
+      };
+
 
   scenario_schema = {
-    name               : string,
+    name               : name,
     typing             : boolean,
     uploading_photo    : boolean,
     recording_video    : boolean,
@@ -246,14 +266,7 @@ function Scenario(api, scenario) {
     action             : fun,
     after              : fun,
 
-    commands: function(key_name, value) {
-      for(let command_name in value) {
-        let sub_scenario = value[command_name];
-
-        // nesting
-        scenario_validator(`${key_name}."${command_name}"`, sub_scenario);
-      }
-    }
+    commands           : command
   };
 
   this._validator = v;

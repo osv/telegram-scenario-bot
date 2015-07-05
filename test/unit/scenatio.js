@@ -441,6 +441,24 @@ describe('Scenario class', function(){
         .to.throw('object use unknown keys: ["fail"]');
     });
 
+    it('Scenario. "name"', function() {
+      expect(() => { new Scenario({}, {name: 'ss/s'}); })
+        .to.throw('not allowed');
+
+      expect(() => { new Scenario({}, {name: 'ss<s'}); })
+        .to.throw('not allowed');
+
+      expect(() => { new Scenario({}, {name: 'ss>s'}); })
+        .to.throw('not allowed');
+
+      expect(() => { new Scenario({}, {name: null}); })
+        .to.throw('must be a string');
+
+      expect(() => { new Scenario({}, {name: null}); })
+        .to.throw('must be a string');
+
+    });
+
     it('Scenario. "commands"', function() {
       let scenario1 = {
         name: "root",
