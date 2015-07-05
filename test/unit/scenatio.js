@@ -371,16 +371,16 @@ describe('Scenario class', function(){
         .to.not.throw();
     });
 
-    it('validatorApi()', function() {
+    it('api()', function() {
       expect(() => {
         var s = new Scenario();
 
         // setter
-        var setter_res = s.validatorApi({ foo: 1});
+        var setter_res = s.api({ foo: 1});
         setter_res.should.to.be.an.instanceof(Scenario);
 
         // getter
-        s.validatorApi().should.to.have.property('foo');
+        s.api().should.to.have.property('foo');
 
         // try validate now
         s.validate({
