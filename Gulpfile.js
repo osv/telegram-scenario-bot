@@ -31,7 +31,7 @@ function test() {
                    'test/unit/**/*.js',
                    '!test/unit/**/.#*'], {read: false})
     .pipe($.plumber())
-    .pipe($.mocha({reporter: 'dot', globals: config.mochaGlobals}));
+    .pipe($.mocha({ globals: config.mochaGlobals}));
 }
 
 // Make babel preprocess the scripts the user tries to import from here on.
