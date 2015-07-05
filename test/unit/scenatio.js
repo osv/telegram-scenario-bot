@@ -371,13 +371,17 @@ describe('Scenario class', function(){
         .to.not.throw();
     });
 
-    it('setApi()', function() {
+    it('validatorApi()', function() {
       expect(() => {
         var s = new Scenario();
-        s.setApi({ foo: 1});
+        var setter_res = s.validatorApi({ foo: 1});
+        setter_res.should.to.be.an.instanceof(Scenario);
+
+        // try validate now
         s.validate({
           typing: "<% foo %>"
         });
+
       })
         .to.not.throw();
     });

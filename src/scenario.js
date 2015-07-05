@@ -251,7 +251,7 @@ function Scenario(api, scenario) {
   };
 
   this._validator = v;
-  this.setApi(api);
+  this.validatorApi(api);
   this._scenario_validator = scenario_validator;
 
   if (scenario) {
@@ -260,8 +260,14 @@ function Scenario(api, scenario) {
 }
 
 Scenario.prototype = {
-  setApi(api) {
-    this._validator.setApi(api);
+  validatorApi(api) {
+    let validator = this._validator;
+    if (_.isUndefined(api)) {
+      return validator;
+    } else {
+      validator.setApi(api);
+      return this;
+    }
   },
 
   setScenario(scenario) {
