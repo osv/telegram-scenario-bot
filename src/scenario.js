@@ -220,13 +220,15 @@ function Scenario(api, scenario) {
       oneof               = v.oneOf.bind(v),
       array               = v.array.bind(v),
       array_of_str        = array.bind(v, [string]),
-      one_of_str_or_array = oneof.bind(v,[string, array_of_str]),
+      array_of_array_of_str = array.bind(v, [array_of_str]),
+      one_of_str_or_array = oneof.bind(v,[string, array_of_array_of_str]),
       scenario_validator  = object.bind(v,
                                         () => scenario_schema, // schema
-                                        [] //required
+                                        ['name'] //required
                                        );
 
   scenario_schema = {
+    name               : string,
     typing             : boolean,
     uploading_photo    : boolean,
     recording_video    : boolean,
@@ -286,6 +288,50 @@ Scenario.prototype = {
 
   validate(scenario) {
     this._scenario_validator('scenario', scenario);
+  },
+
+  getScenario(path) {
+    if (_.isUndefined(path)) {
+      return this._scenario;
+    }
+
+    let root_name = this._scenario.name,
+        root_re = new RegExp(`^/${root_name}`);
+
+    // remove root from path
+    path = path.replace(root_re, '');
+
+    let frags = path.split('/'),
+        cur_path = '/' + root_name,
+        scenario = this._scenario;
+
+    for(let next_name of frags) {
+      if(_.isEmpty(next_name)) {
+        continue;
+      }
+
+      let found = false;
+      if (_.has(scenario, 'commands')) {
+        for (let command_name in scenario.commands) {
+          let command = scenario.commands[command_name],
+              cmd_name = command.name;
+          if (cmd_name === next_name) {
+
+            // ok, found, continue for next scen name
+            cur_path += '/' + cmd_name;
+            scenario = command;
+            found = true;
+            break;
+          }
+        }
+      }
+
+      if (! found) {
+        throw Error(`Cannot find scenario: "${next_name}" in "${cur_path}"`);
+      }
+    }
+
+    return scenario;
   }
 };
 

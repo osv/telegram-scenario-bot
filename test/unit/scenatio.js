@@ -384,6 +384,7 @@ describe('Scenario class', function(){
 
         // try validate now
         s.validate({
+          name: "root",
           typing: "<% foo %>"
         });
       })
@@ -393,6 +394,7 @@ describe('Scenario class', function(){
     it('scenario() should set propert .scenario and return this', function() {
       expect(() => {
         var scenario_templ = {
+          name: "root",
           typing: true
         };
         var s = new Scenario();
@@ -414,6 +416,7 @@ describe('Scenario class', function(){
       expect(() => {
         var s = new Scenario();
         s.validate({
+          name: "root",
           typing: true
         });
       })
@@ -422,6 +425,7 @@ describe('Scenario class', function(){
 
     it('Basic schema', function(){
       let scenario1 = {
+        name: "root",
         typing: true,
       };
 
@@ -429,6 +433,7 @@ describe('Scenario class', function(){
         .to.not.throw();
 
       let scenario2 = {
+        name: "root",
         fail: true
       };
 
@@ -438,9 +443,11 @@ describe('Scenario class', function(){
 
     it('Scenario. "commands"', function() {
       let scenario1 = {
+        name: "root",
         typing: true,
         commands: {
           "/help": {
+            name: "help",
             typing: true
           }
         }
@@ -450,9 +457,11 @@ describe('Scenario class', function(){
         .to.not.throw();
 
       let scenario2= {
+        name: "root",
         typing: true,
         commands: {
           "/help": {
+            name: "help",
             typing: 123 // <- fail here
           }
         }
@@ -460,6 +469,79 @@ describe('Scenario class', function(){
 
       expect(() => { new Scenario({}, scenario2); })
         .to.throw('"scenario.commands."/help".typing" must be boolean or function');
+    });
+  });
+
+  describe('Scenario methods', function() {
+    before(function() {
+      let scenario = this.scenario = new Scenario(),
+
+          script_quit_f = this.script_quit_f = {
+            name: "quit-force",
+            menu: 'yes || no\n' +
+              '--\n' +
+              'cancel'
+          },
+          script_quit = this.script_quit = {
+            name: "quit",
+            text: "Quit?",
+            menu: [
+              ['yes', 'no'],
+              ['cancel']
+            ],
+            commands: {
+              yes: {
+                name: 'yes'
+              },
+              'no': {
+                name: 'no'
+              }
+            },
+          },
+          script = this.script = {
+            name: "root",
+            text: "hello",
+            commands: {
+              '/quit-force' : script_quit_f,
+              '/quit'       : script_quit,
+              '.': {
+                name: 'default',
+                text: 'Unrecognized command',
+              }
+            },
+          },
+          api = this.api = {
+
+          };
+
+      scenario
+        .api(api)
+        .scenario(script);
+    });
+
+    it('getScenario(), get scenario object, using path',function() {
+      let s = this.scenario,
+          quit_scenario = this.script_quit,
+          root_scenario = this.script;
+
+      s.should.be.instanceof(Scenario);
+      s.getScenario().should.be.deep.equal(root_scenario);
+
+      s.getScenario('/root').should.be.deep.equal(root_scenario);
+      s.getScenario('/').should.be.deep.equal(root_scenario);
+
+      // both are quit
+      s.getScenario('/quit').should.be.deep.equal(quit_scenario);
+      s.getScenario('/root/quit').should.be.deep.equal(quit_scenario);
+
+      expect(s.getScenario).bind(s).called('/foo')
+        .to.throw('Cannot find scenario: "foo" in "/root"');
+
+      expect(s.getScenario).bind(s).called('/root/quit-force/')
+        .to.not.throw();
+
+      expect(s.getScenario).bind(s).called('/root/quit-force/bar')
+        .to.throw('Cannot find scenario: "bar" in "/root/quit-force"');
     });
   });
 
