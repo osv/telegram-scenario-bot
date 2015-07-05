@@ -457,6 +457,10 @@ describe('Scenario class', function(){
       expect(() => { new Scenario({}, {name: null}); })
         .to.throw('must be a string');
 
+      expect(() => {
+        new Scenario({}, {name: function() {}});
+      })
+        .to.throw('must be a string');
     });
 
     it('Scenario. "commands"', function() {
