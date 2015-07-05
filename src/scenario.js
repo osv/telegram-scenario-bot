@@ -250,9 +250,9 @@ function Scenario(api, scenario) {
     }
   };
 
-  this.validator = v;
+  this._validator = v;
   this.setApi(api);
-  this.scenario_validator = scenario_validator;
+  this._scenario_validator = scenario_validator;
 
   if (scenario) {
     this.setScenario(scenario);
@@ -261,16 +261,16 @@ function Scenario(api, scenario) {
 
 Scenario.prototype = {
   setApi(api) {
-    this.validator.setApi(api);
+    this._validator.setApi(api);
   },
 
   setScenario(scenario) {
     this.validate(scenario);
-    this.scenario = scenario;
+    this._scenario = scenario;
   },
 
   validate(scenario) {
-    this.scenario_validator('scenario', scenario);
+    this._scenario_validator('scenario', scenario);
   }
 };
 

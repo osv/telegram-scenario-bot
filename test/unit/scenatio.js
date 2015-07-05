@@ -390,7 +390,7 @@ describe('Scenario class', function(){
         var s = new Scenario();
         s.setScenario(scenario_templ);
 
-        s.scenario.should.to.be.equal(scenario_templ);
+        s._scenario.should.to.be.equal(scenario_templ);
       })
         .to.not.throw();
     });
