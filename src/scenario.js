@@ -208,7 +208,7 @@ Validator.prototype = {
 
 };
 
-function Scenario(api, scenario) {
+function Scenario(api, new_scenario) {
   var v                   = new Validator(api),
       scenario_schema     = {},
 
@@ -258,8 +258,8 @@ function Scenario(api, scenario) {
   this.validatorApi(api);
   this._scenario_validator = scenario_validator;
 
-  if (scenario) {
-    this.setScenario(scenario);
+  if (new_scenario) {
+    this.scenario(new_scenario);
   }
 }
 
@@ -274,9 +274,14 @@ Scenario.prototype = {
     }
   },
 
-  setScenario(scenario) {
-    this.validate(scenario);
-    this._scenario = scenario;
+  scenario(new_scenario) {
+    if (_.isUndefined(new_scenario)) {
+      return this._scenario;
+    } else {
+      this.validate(new_scenario);
+      this._scenario = new_scenario;
+      return this;
+    }
   },
 
   validate(scenario) {

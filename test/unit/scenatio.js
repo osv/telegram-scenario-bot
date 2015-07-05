@@ -390,14 +390,21 @@ describe('Scenario class', function(){
         .to.not.throw();
     });
 
-    it('setScenario() should set propert .scenario', function() {
+    it('scenario() should set propert .scenario and return this', function() {
       expect(() => {
         var scenario_templ = {
           typing: true
         };
         var s = new Scenario();
-        s.setScenario(scenario_templ);
 
+        // setter
+        var setter_res = s.scenario(scenario_templ);
+        setter_res.should.to.be.an.instanceof(Scenario);
+
+        // getter
+        s.scenario().should.to.be.equal(scenario_templ);
+
+        // internal property
         s._scenario.should.to.be.equal(scenario_templ);
       })
         .to.not.throw();
