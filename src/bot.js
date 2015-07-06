@@ -7,14 +7,6 @@ import Scenario from './scenario.js';
 
 import _ from 'underscore';
 
-function sleep(millisec) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, millisec);
-  });
-}
-
 function Bot(token) {
   // composite
   this._tel_api = new BotApi(token);
@@ -119,12 +111,40 @@ Bot.prototype = {
   },
 
   _processMessage: async function(data) {
+    var msg = data.message,
+        from = msg.from,
+        from_id = from.id,
+        chat = msg.chat,
+        chat_id = chat.id,
+        state_holder = this.stateHolder(),
+        state = state_holder.get(from_id);
 
+    state = state || {};
+
+    if (! state.scenario_path) {
+      state.scenario_path = '/';
+    }
+
+    let scenario = this._getScenario(state.scenario_path);
+
+    let reply_msg = await scenario.getReply();
+
+    let api = this.telegramApi();
+
+    if (! _.isEmpty(reply_msg) /*|| menu */) {
+      await api.sendMessage(chat_id,
+                            reply_msg
+                           );
+    }
+  },
+
+  _getScenario: function(path) {
+    var s = this.scenario();
+    return s.getScenario(path);
   },
 
   _lock_user: function(user_id) {
-    this._user_reply_locks[user_id] =
-      setTimeout(() => { this._unlock_user(user_id); });
+    this._user_reply_locks[user_id] = 1;
     return this;
   },
 
