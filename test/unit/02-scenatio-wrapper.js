@@ -111,6 +111,22 @@ describe('Scenario wrapper', function() {
       return new ScenarioWrapper(api, {typing: '<% getTypeStatus %>'})
         .getAction().should.eventually.eql('');
     });
+
+    it('Ensure getAction(context, args) pass context and args to cb', function() {
+      let context = {
+        item1: 1
+      };
+      let api = {
+        getTypeStatus: function(arg1, arg2) {
+          this.should.to.have.property('item1');
+          arg1.should.to.be.eql('arg1');
+          arg2.should.to.be.eql('arg2');
+          return false;
+        }
+      };
+      return new ScenarioWrapper(api, {typing: '<% getTypeStatus %>'})
+        .getAction(context, ['arg1', 'arg2']).should.eventually.eql('');
+    });
   });
 
   describe('getReply(), reply property of scenario', function() {
@@ -141,6 +157,22 @@ describe('Scenario wrapper', function() {
       return new ScenarioWrapper({}, // empty api
                                  {reply: 'Hello <% getName %>. How are you?'})
         .getReply().should.be.rejectedWith(/Unknown api function "getName"/);
+    });
+
+    it('Ensure getReply(context, args) pass context and args to cb', function() {
+      let context = {
+        item1: 1
+      };
+      let api = {
+        reply: function(arg1, arg2) {
+          this.should.to.have.property('item1');
+          arg1.should.to.be.eql('arg1');
+          arg2.should.to.be.eql('arg2');
+          return 'hello';
+        }
+      };
+      return new ScenarioWrapper(api, {reply: '<% reply %>'})
+        .getReply(context, ['arg1', 'arg2']).should.eventually.eql('hello');
     });
   });
 

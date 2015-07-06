@@ -12,7 +12,7 @@ ScenarioWrapper.prototype = {
     return this._scenario;
   },
 
-  _callFunction: async function(value) {
+  _callFunction: async function(value, context, args) {
     if (_.isFunction(value))
       return await value();
 
@@ -28,19 +28,19 @@ ScenarioWrapper.prototype = {
       if (function_name &&
           _.has(this._api, function_name)) {
         let f = api[function_name];
-        return await f();
+        return await f.apply(context, args);
       }
     }
     return null;
   },
 
-  _asBoolean: async function (value) {
+  _asBoolean: async function (value, context, args) {
     if (_.isBoolean(value))
       return value;
-    return await this._callFunction(value);
+    return await this._callFunction(value, context, args);
   },
 
-  _asString: async function(value) {
+  _asString: async function(value, context, args) {
     if (_.isFunction(value))
       return await value();
 
@@ -69,7 +69,7 @@ ScenarioWrapper.prototype = {
 
       // call founded functions
       for(let f of fun_to_call) {
-        let res = await f();
+        let res = await f.apply(context, args);
         fun_call_results.push(res);
       }
 
@@ -83,7 +83,7 @@ ScenarioWrapper.prototype = {
   /**
    * Telegram action for sendChatAction() from scene object
    */
-  getAction: async function() {
+  getAction: async function(context, args) {
     let scenario = this.getScenario(),
         actions = {
           'typing'             : 'typing',
@@ -98,7 +98,7 @@ ScenarioWrapper.prototype = {
 
     for(let act_test in actions) {
       if (_.has(scenario, act_test)) {
-        let res = await this._asBoolean( scenario[act_test] );
+        let res = await this._asBoolean( scenario[act_test], context, args );
         if (res)
           return actions[act_test];
       }
@@ -110,10 +110,10 @@ ScenarioWrapper.prototype = {
   /**
    * Get msg for reply from scenario. Call callback if need.
    */
-  getReply: async function() {
+  getReply: async function(context, args) {
     let scenario = this.getScenario(),
         reply_value = scenario.reply;
-    return await this._asString(reply_value);
+    return await this._asString(reply_value, context, args);
   }
 };
 
