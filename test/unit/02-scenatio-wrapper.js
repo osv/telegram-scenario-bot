@@ -342,4 +342,47 @@ describe('Scenario wrapper', function() {
       });
     });
   });
+  describe('"commands" property, getCommand()',function() {
+    before(function() {
+      this.scenario = {
+        name: 'root',
+        commands: {
+          '/start': {
+            commands: {
+              '.': {name: 'default'},
+              '/print': {name: 'print'},
+              '/list': {name: 'list'},
+            }
+          },
+        }
+      };
+    });
+
+    it('should return null if no "commands" in scenario', function() {
+      let s = new ScenarioWrapper({}, {}),
+          res = s.getNextScenario('/foo');
+      expect(res).to.be.equal(null);
+    });
+
+    it('should "." match last', function() {
+      let scenario = this.scenario,
+          s = new ScenarioWrapper({}, scenario),
+          unknown_w = s.getNextScenario('/quit'),
+          start_w = s.getNextScenario('/start');
+
+      expect(start_w, '/start').to.be.an.instanceof(ScenarioWrapper);
+      expect(unknown_w, '/quit is not in commands').to.be.equal(null);
+
+      let list_w = start_w.getNextScenario('/list');
+
+      expect(list_w, '/list').to.be.an.instanceof(ScenarioWrapper);
+      list_w.getName().should.be.equal('list');
+
+      let default_w = start_w.getNextScenario('foo bar');
+
+      expect(default_w, '"foo bar" matched by "." pattern').to.be.an.instanceof(ScenarioWrapper);
+      default_w.getName().should.be.equal('default');
+    });
+
+  });
 });

@@ -195,7 +195,42 @@ ScenarioWrapper.prototype = {
     let scenario = this.getScenario(),
         fun = scenario.action;
     return await this._callFunction(fun, context, args);
-  }
+  },
+
+  /**
+   * Get sub-scenario depend on given command text. Commands is regexp patterns for match next scenario.
+   * Pattern "." is special case, it will be matched LAST.
+   * @param {string} text
+   * @return {ScenarioWrapper|null} next scenario
+   */
+  getNextScenario: function(text) {
+    // get commands
+    var scenario = this.getScenario(),
+        commands = scenario.commands,
+        api = this._api,
+        default_cmd;
+
+    if (_.isEmpty(commands))
+      return null;
+
+    if (_.has(commands, '.'))
+      default_cmd = '.';
+
+    for (let cmd in commands) {
+      if (cmd === default_cmd)
+        continue;
+
+      let regexp = new RegExp(cmd);
+      if (regexp.test(text)) {
+        return new ScenarioWrapper(api, commands[cmd]);
+      }
+    }
+
+    if (default_cmd) {
+      return new ScenarioWrapper(api, commands[default_cmd]);
+    }
+    return null;
+  },
 };
 
 export default ScenarioWrapper;
