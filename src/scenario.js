@@ -1,8 +1,9 @@
 'use strict';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 import {Validator} from './scenario-validator.js';
+import {ScenarioWrapper} from './scenario-wrapper.js';
 
 /*
 
@@ -190,6 +191,12 @@ Scenario.prototype = {
 
    */
   getScenario(path) {
+    let api = this.api(),
+        scenario = this._getScenario(path)
+    return new ScenarioWrapper(api, scenario);
+  },
+
+  _getScenario(path) {
     if (_.isUndefined(path)) {
       return this._scenario;
     }

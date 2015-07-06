@@ -1,4 +1,4 @@
-var _ = require('underscore');
+import _ from 'underscore';
 
 /**
  * Simple Validator. For internal usage,

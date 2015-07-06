@@ -187,20 +187,21 @@ describe('Scenario class', function(){
         .scenario(script);
     });
 
-    it('getScenario(), get scenario object, using path',function() {
+    it('getScenario(path), should return ScenarioWrapper obj based on path',function() {
       let s = this.scenario,
-          quit_scenario = this.script_quit,
-          root_scenario = this.script;
+          quit_scenario_wrapped = new ScenarioWrapper({}, this.script_quit),
+          root_scenario_wrapped = new ScenarioWrapper({}, this.script);
 
       s.should.be.instanceof(Scenario);
-      s.getScenario().should.be.deep.equal(root_scenario);
+      s.getScenario().should.be.instanceof(ScenarioWrapper);
+      s.getScenario().should.be.deep.equal(root_scenario_wrapped);
 
-      s.getScenario('/root').should.be.deep.equal(root_scenario);
-      s.getScenario('/').should.be.deep.equal(root_scenario);
+      s.getScenario('/root').should.be.deep.equal(root_scenario_wrapped);
+      s.getScenario('/').should.be.deep.equal(root_scenario_wrapped);
 
       // both are quit
-      s.getScenario('/quit').should.be.deep.equal(quit_scenario);
-      s.getScenario('/root/quit').should.be.deep.equal(quit_scenario);
+      s.getScenario('/quit').should.be.deep.equal(quit_scenario_wrapped);
+      s.getScenario('/root/quit').should.be.deep.equal(quit_scenario_wrapped);
 
       expect(s.getScenario).bind(s).called('/foo')
         .to.throw('Cannot find scenario: "foo" in "/root"');

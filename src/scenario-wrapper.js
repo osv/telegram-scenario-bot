@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 function ScenarioWrapper(api, scenario) {
   this._api = api;
