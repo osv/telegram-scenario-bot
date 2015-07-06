@@ -23,7 +23,7 @@ const MAX_POLL_DELAY    = 60000;
  *     }, millisec);
  *   });
  * }
- * 
+ *
  * // util promise
  * function sleep(millisec) {
  *   return new Promise(function(resolve) {
@@ -32,7 +32,7 @@ const MAX_POLL_DELAY    = 60000;
  *     }, millisec);
  *   });
  * }
- * 
+ *
  * // return incremental number after 1sec waiting
  * async function poller() {
  *   console.log('=> Start polling');
@@ -42,14 +42,14 @@ const MAX_POLL_DELAY    = 60000;
  *   console.log(`=> End polling, returning ${poller.number}`);
  *   return poller.number;
  * }
- * 
+ *
  * var jq = new JobQueue()
  *       .maxConcurentJobs(2)
  *       .setJobPoller(poller)
  *       .setWorker(worker)
  *       .start();
- * 
- * 
+ *
+ *
  * @constructor
  */
 function JobQueue() {
@@ -58,7 +58,7 @@ function JobQueue() {
   this._poller_fn = null;
   this._worker_fn = null;
   this._poll_delay = 0;         // if polling failed, delay will increased
-  this.max_delay = MAX_POLL_DELAY;
+  this._max_delay = MAX_POLL_DELAY;
 }
 
 JobQueue.prototype = {
@@ -67,8 +67,8 @@ JobQueue.prototype = {
    */
   _addPollDelay() {
     this._poll_delay += 5000;
-    if (this._poll_delay > this.max_delay) {
-      this._poll_delay = this.max_delay;
+    if (this._poll_delay > this.maxPollDelay()) {
+      this._poll_delay = this.maxPollDelay();
     }
     return this;
   },
@@ -93,10 +93,10 @@ JobQueue.prototype = {
    */
   maxPollDelay(delay) {
     if (_.isUndefined(delay)) {
-      return this.max_delay;
+      return this._max_delay;
     }
     if (_.isNumber(delay) && delay >= 0) {
-      this.max_delay = delay;
+      this._max_delay = delay;
     }
     return this;
   },
@@ -174,6 +174,7 @@ JobQueue.prototype = {
       job_data = await this._callPoller();
       this._clearPollDelay();
 
+      // need run worker before next polling job
       let self = this;
       setImmediate((function(data) {
         return async function() {
@@ -191,6 +192,7 @@ JobQueue.prototype = {
       this._addPollDelay();
     }
 
+    // runt little bit later, after job started
     setTimeout(() => { this._nextJobMaybe(); }, this._getPollDelay());
   },
 };
