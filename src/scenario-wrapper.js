@@ -22,7 +22,7 @@ ScenarioWrapper.prototype = {
 
   _callFunction: async function(value, context, args) {
     if (_.isFunction(value))
-      return await value();
+      return await value.apply(context, args);
 
     if (_.isString(value)) {
       let found = value.match(/^<%\s*(\w+)\s*%>$/);
@@ -57,7 +57,7 @@ ScenarioWrapper.prototype = {
   // if value is string, replace <% %> with callback result
   _asString: async function(value, context, args) {
     if (_.isFunction(value))
-      return '' + await value();
+      return '' + await value.apply(context, args);
 
     if (_.isString(value)) {
       // Need to say, I dont know how to use async function
@@ -150,6 +150,9 @@ ScenarioWrapper.prototype = {
 
   /**
    * Get scenario time to live, if expire ttl, than return to root menu
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {number}
    */
   getTTL: async function(context, args) {
     let scenario = this.getScenario(),
@@ -157,6 +160,29 @@ ScenarioWrapper.prototype = {
         result = await this._asNumber(ttl_value, context, args);
 
     return +result;
+  },
+
+  /**
+   * Call scenario "before" function. It usually called at early stage of processing message
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   */
+  callBeforeFun: async function(context, args) {
+    let scenario = this.getScenario(),
+        fun = scenario.before;
+    return await this._callFunction(fun, context, args);
+  },
+
+  /**
+   * Call scenario "after" function. It usually called at later stage of processing message,
+   * after reply message.
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   */
+  callAfterFun: async function(context, args) {
+    let scenario = this.getScenario(),
+        fun = scenario.after;
+    return await this._callFunction(fun, context, args);
   }
 };
 

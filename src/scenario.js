@@ -60,7 +60,7 @@ function Scenario(api, scenario) {
       scenario_schema     = {},
 
       object              = v.object.bind(v),
-      fun                 = v.object.bind(v),
+      fun                 = v.fun.bind(v),
       boolean             = v.boolean.bind(v),
       number              = v.number.bind(v),
       string              = v.string.bind(v),

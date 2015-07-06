@@ -167,7 +167,7 @@ describe('Scenario wrapper', function() {
         .getReply().should.be.rejectedWith(/Unknown api function "getName"/);
     });
 
-    it('Ensure getReply(context, args) pass context and args to cb', function() {
+    it('Ensure getReply(context, args) pass context and args to cb in <% %>', function() {
       let context = {
         item1: 1
       };
@@ -180,6 +180,21 @@ describe('Scenario wrapper', function() {
         }
       };
       return new ScenarioWrapper(api, {reply: '<% reply %>'})
+        .getReply(context, ['arg1', 'arg2']).should.eventually.eql('hello');
+    });
+
+    it('Ensure getReply(context, args) pass context and args to cb', function() {
+      let context = {
+        item1: 1
+      };
+      return new ScenarioWrapper({}, {
+        reply: function(arg1, arg2) {
+          this.should.to.have.property('item1');
+          arg1.should.to.be.eql('arg1');
+          arg2.should.to.be.eql('arg2');
+          return 'hello';
+        }
+      })
         .getReply(context, ['arg1', 'arg2']).should.eventually.eql('hello');
     });
   });
@@ -240,6 +255,76 @@ describe('Scenario wrapper', function() {
           };
       return new ScenarioWrapper(api, {reply: '<% getReply %>'})
         .getReply().should.eventually.eql('hello');
+    });
+  });
+
+  describe('before, action, after function',function() {
+    before(function() {
+      this.api = {
+        return_ok: function() {
+          return 'ok';
+        }
+      };
+    })
+    describe('callBeforeFun(), Call scenario "before" function',function() {
+      it('using callback', function() {
+        return new ScenarioWrapper({}, {before: function() {
+          return 'ok';
+        }})
+          .callBeforeFun().should.eventually.equal('ok');
+      });
+
+      it('using <% %>', function() {
+        let api = this.api;
+        return new ScenarioWrapper(api, {before: "<% return_ok %>"})
+          .callBeforeFun().should.eventually.equal('ok');
+      });
+
+      it('Ensure callBeforeFun(context, args) pass context and args to cb', function() {
+        let context = {
+          item1: 1
+        };
+        return new ScenarioWrapper({}, {
+          before: function(arg1, arg2) {
+            this.should.to.have.property('item1');
+            arg1.should.to.be.eql('arg1');
+            arg2.should.to.be.eql('arg2');
+            return 'ok';
+          }
+        })
+          .callBeforeFun(context, ['arg1', 'arg2']).should.eventually.eql('ok');
+      });
+
+      it('Ensure callBeforeFun(context, args) pass context and args to cb in <% %>', function() {
+        let context = {
+          item1: 1
+        };
+        let api = {
+          fun: function(arg1, arg2) {
+            this.should.to.have.property('item1');
+            arg1.should.to.be.eql('arg1');
+            arg2.should.to.be.eql('arg2');
+            return 'ok';
+          }
+        };
+        return new ScenarioWrapper(api, {before: '<% fun %>'})
+          .callBeforeFun(context, ['arg1', 'arg2']).should.eventually.eql('ok');
+      });
+
+    });
+    describe('callAfterFun(), Call scenario "after" function',function() {
+      it('using callback', function() {
+        return new ScenarioWrapper({}, {after: function() {
+          return 'ok';
+        }})
+          .callAfterFun().should.eventually.equal('ok');
+      });
+
+      it('using <% %>', function() {
+        let api = this.api;
+        return new ScenarioWrapper(api, {after: "<% return_ok %>"})
+          .callAfterFun().should.eventually.equal('ok');
+      });
     });
   });
 });
