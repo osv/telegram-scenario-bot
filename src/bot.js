@@ -3,6 +3,7 @@
 import JobQueue from './job-queue.js';
 import BotApi from './telegram-api-promisified.js';
 import StateHolder from './state-holder.js';
+import Scenario from './scenario.js';
 
 import _ from 'underscore';
 
@@ -20,6 +21,8 @@ function Bot(token) {
   this._state_holder = new StateHolder();
   let queue = this._job_queue = new JobQueue();
 
+  this._scenario = null;
+
   queue.setJobPoller(this._poller.bind(this));
   queue.setWorker(this._worker.bind(this));
 
@@ -30,10 +33,17 @@ function Bot(token) {
 }
 
 Bot.prototype = {
-  telegramApi(BotApi) {
-    if (_.isUndefined(BotApi))
+  scenario (new_scenario) {
+    if (_.isUndefined(new_scenario))
+      return this._scenario;
+    this._scenario = new_scenario;
+    return this;
+  },
+
+  telegramApi(new_botapi) {
+    if (_.isUndefined(new_botapi))
       return this._tel_api;
-    this._tel_api = BotApi;
+    this._tel_api = new_botapi;
     return this;
   },
 
