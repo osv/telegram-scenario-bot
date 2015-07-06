@@ -82,24 +82,20 @@ Bot.prototype = {
         api = this.telegramApi();
 
     this._lock_user(from_id);
-
     try {
-    // console.log('Processing data...:', data);
-    //   await api.sendChatAction(chat_id, 'typing');
-    //   await sleep(3000);
-    //   await api.sendMessage(chat_id, `Hello, msgid: ${msg.text}\n /4 df sdfdsd fsdASDFGH A\n/2 dfsdf`,
-    //                         true, 0,
-    //                         {
-    //                           keyboard: [
-    //                             ['yes', 'no', 'more'],
-    //                             [ 'cancel'],
-    //                           ],
-    //                           resize_keyboard: true
-    //                         });
+
+      await this._processMessage(data);
+
     } catch (err) {
-      console.log(`Error while processing message ${err}\n${err.stack}`);
+      console.log(`Error while processing message. Message:`,
+                  msg,
+                  `\nTrace: ${err.stack}`);
     }
     this._unlock_user(from_id);
+  },
+
+  _processMessage: async function(data) {
+
   },
 
   _lock_user: function(user_id) {
