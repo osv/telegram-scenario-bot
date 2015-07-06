@@ -41,6 +41,14 @@ Bot.prototype = {
     return this;
   },
 
+  stateHolder(new_stateholder) {
+    if (_.isUndefined(new_stateholder)) {
+      return this._state_holder;
+    }
+    this._state_holder = new_stateholder;
+    return this;
+  },
+
   telegramApi(new_botapi) {
     if (_.isUndefined(new_botapi))
       return this._tel_api;
