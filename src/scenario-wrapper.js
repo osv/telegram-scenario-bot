@@ -2,6 +2,14 @@
 
 import _ from 'underscore';
 
+/**
+ * Wrapper for coercing scenario data.
+ * Each function allow to pass context and arguments that will be applied
+ * to api callback. Api callback called if scenario's field have function value or
+ * string like "<% abc %>" (Here abc.apply(context, arguments) will be called).
+ * @param {object} api object that hold all known api for using in <% %>
+ * @param {object} scenario - scenario node.
+ */
 function ScenarioWrapper(api, scenario) {
   this._api = api;
   this._scenario = scenario;
@@ -40,6 +48,7 @@ ScenarioWrapper.prototype = {
     return await this._callFunction(value, context, args);
   },
 
+  // if value is string, replace <% %> with callback result
   _asString: async function(value, context, args) {
     if (_.isFunction(value))
       return await value();
@@ -47,7 +56,7 @@ ScenarioWrapper.prototype = {
     if (_.isString(value)) {
       // Need to say, I dont know how to use async function
       // in callback of String.prototype.replace.
-      // So, first find functions, wait them, and then replace
+      // So, first find functions, await them, and then do replace
 
       let api = this._api,
           fun_to_call = [],     // function that need to call
@@ -82,6 +91,9 @@ ScenarioWrapper.prototype = {
 
   /**
    * Telegram action for sendChatAction() from scene object
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {string} Telegram action
    */
   getAction: async function(context, args) {
     let scenario = this.getScenario(),
@@ -108,12 +120,25 @@ ScenarioWrapper.prototype = {
   },
 
   /**
-   * Get msg for reply from scenario. Call callback if need.
+   * Get msg for reply from scenario. Call callback if need,
+   * interpolate result api like "<% foo %>".
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {string} Reply text. "reply" field of scenario.
    */
   getReply: async function(context, args) {
     let scenario = this.getScenario(),
         reply_value = scenario.reply;
     return await this._asString(reply_value, context, args);
+  },
+
+  /**
+   * Get scenario name
+   * @returns {string}
+   */
+  getName: function() {
+    let scenario = this.getScenario();
+    return scenario.name;
   }
 };
 

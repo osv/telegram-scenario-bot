@@ -6,13 +6,21 @@ import {ScenarioWrapper} from '../../src/scenario-wrapper.js';
 chai.should();
 
 describe('Scenario wrapper', function() {
-  describe('constructor',function() {
+  describe('Basic methods',function() {
     it('getScenario', function() {
       let scen = {foo: 1},
           s = new ScenarioWrapper({}, // api
                                   scen);
 
       s.getScenario().should.to.be.eql(scen);
+    });
+
+    it('getName', function() {
+      let scen = {name: 'root-scen'},
+          s = new ScenarioWrapper({}, // api
+                                  scen);
+
+      s.getName().should.to.be.eql('root-scen');
     });
 
   });
