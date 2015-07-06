@@ -25,6 +25,8 @@ function Bot(token) {
 
   this._messages = [];
   this._offset = 0;
+
+  this._user_reply_locks = {};  // store user id when worker started
 }
 
 Bot.prototype = {
@@ -43,37 +45,77 @@ Bot.prototype = {
     this.jobQueue().start();
   },
 
+  /**
+   * Message poller for Jobqueue. Use long-polling getUpdate api of Telegram.
+   */
   _poller: async function() {
-    while (! this._messages.length) {
-      console.log('getUpdates..');
-      let offset = this.offset +1,
-          updates = await this._tel_api.getUpdates(offset, 100, 1800);
-      this._messages = updates.result;
+    while (1) {
+      while (! this._messages.length) {
+        console.log('getUpdates..');
+        let offset = this.offset +1,
+            updates = await this._tel_api.getUpdates(offset, 100, 1800);
+        this._messages = updates.result;
+      }
+
+      let msg = this._messages.shift(),
+          update_id = msg.update_id,
+          message = msg.message,
+          from_id = message.from.id;
+
+      this.offset = update_id;
+
+      if (this._is_locked_user(from_id)) {
+        console.log(`user is still locked, skip this message ${from_id}`, this._user_reply_locks);
+        continue;
+      }
+
+      return msg;
     }
-    let msg = this._messages.shift();
-    this.offset = msg.update_id;
-    return msg;
   },
 
   _worker: async function(data) {
     let msg = data.message,
+        from = msg.from,
+        from_id = from.id,
         chat = msg.chat,
         chat_id = chat.id,
         api = this.telegramApi();
 
-    console.log('Processing data...:', data);
-    await api.sendChatAction(chat_id, 'typing');
-    await sleep(300);
-    await api.sendMessage(chat_id, `Hello, msgid: ${msg.text}\n /4 df sdfdsd fsdASDFGH A\n/2 dfsdf`,
-                          true, 0,
-                          {
-                            keyboard: [
-                              ['yes', 'no', 'more'],
-                              [ 'cancel'],
-                            ],
-                            resize_keyboard: true
-                          });
+    this._lock_user(from_id);
+
+    try {
+    // console.log('Processing data...:', data);
+    //   await api.sendChatAction(chat_id, 'typing');
+    //   await sleep(3000);
+    //   await api.sendMessage(chat_id, `Hello, msgid: ${msg.text}\n /4 df sdfdsd fsdASDFGH A\n/2 dfsdf`,
+    //                         true, 0,
+    //                         {
+    //                           keyboard: [
+    //                             ['yes', 'no', 'more'],
+    //                             [ 'cancel'],
+    //                           ],
+    //                           resize_keyboard: true
+    //                         });
+    } catch (err) {
+      console.log(`Error while processing message ${err}\n${err.stack}`);
+    }
+    this._unlock_user(from_id);
   },
+
+  _lock_user: function(user_id) {
+    this._user_reply_locks[user_id] =
+      setTimeout(() => { this._unlock_user(user_id); });
+    return this;
+  },
+
+  _unlock_user: function(user_id) {
+    delete this._user_reply_locks[user_id];
+    return this;
+  },
+
+  _is_locked_user: function(user_id) {
+    return _.has(this._user_reply_locks, user_id);
+  }
 };
 
 export default {Bot};
