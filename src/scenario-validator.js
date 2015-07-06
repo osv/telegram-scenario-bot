@@ -165,4 +165,4 @@ Validator.prototype = {
 
 };
 
-export {Validator};
+export default Validator;

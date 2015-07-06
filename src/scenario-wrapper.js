@@ -142,4 +142,4 @@ ScenarioWrapper.prototype = {
   }
 };
 
-export {ScenarioWrapper};
+export default ScenarioWrapper;

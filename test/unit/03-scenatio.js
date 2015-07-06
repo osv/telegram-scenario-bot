@@ -1,9 +1,9 @@
 'use strict';
 /* jshint -W031 */
 
-import {Scenario} from '../../src/scenario.js';
+import Scenario from '../../src/scenario.js';
 
-import {ScenarioWrapper} from '../../src/scenario-wrapper.js';
+import ScenarioWrapper from '../../src/scenario-wrapper.js';
 
 chai.should();
 

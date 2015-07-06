@@ -2,8 +2,8 @@
 
 import _ from 'underscore';
 
-import {Validator} from './scenario-validator.js';
-import {ScenarioWrapper} from './scenario-wrapper.js';
+import Validator from './scenario-validator.js';
+import ScenarioWrapper from './scenario-wrapper.js';
 
 /*
 
@@ -241,7 +241,7 @@ Scenario.prototype = {
   }
 };
 
-export {Scenario};
+export default Scenario;
 
 // var scenario = {
 //   // Type of action to broadcast: Choose one, depending on what the user is about to receive

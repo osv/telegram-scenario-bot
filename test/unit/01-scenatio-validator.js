@@ -1,7 +1,7 @@
 'use strict';
 /* jshint -W031 */
 
-import {Validator} from '../../src/scenario-validator.js';
+import Validator from '../../src/scenario-validator.js';
 
 chai.should();
 

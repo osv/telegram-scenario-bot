@@ -130,4 +130,4 @@ Bot.prototype = {
   }
 };
 
-export default {Bot};
+export default Bot;
