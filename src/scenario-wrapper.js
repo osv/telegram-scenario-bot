@@ -51,7 +51,7 @@ ScenarioWrapper.prototype = {
   // if value is string, replace <% %> with callback result
   _asString: async function(value, context, args) {
     if (_.isFunction(value))
-      return await value();
+      return '' + await value();
 
     if (_.isString(value)) {
       // Need to say, I dont know how to use async function
