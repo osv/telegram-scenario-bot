@@ -34,8 +34,9 @@ function Bot(token) {
 
 Bot.prototype = {
   scenario (new_scenario) {
-    if (_.isUndefined(new_scenario))
+    if (_.isUndefined(new_scenario)) {
       return this._scenario;
+    }
     this._scenario = new_scenario;
     return this;
   },
@@ -52,6 +53,11 @@ Bot.prototype = {
   },
 
   start() {
+    let scenario = this.scenario();
+    if (_.isNull(scenario) ||
+        ! scenario instanceof Scenario) {
+      throw Error('You must set scenario before start()');
+    }
     this.jobQueue().start();
   },
 
