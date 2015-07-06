@@ -183,6 +183,18 @@ ScenarioWrapper.prototype = {
     let scenario = this.getScenario(),
         fun = scenario.after;
     return await this._callFunction(fun, context, args);
+  },
+
+  /**
+   * Call scenario "action" function. It usually called before get reply field.
+   * after reply message.
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   */
+  callActionFun: async function(context, args) {
+    let scenario = this.getScenario(),
+        fun = scenario.action;
+    return await this._callFunction(fun, context, args);
   }
 };
 

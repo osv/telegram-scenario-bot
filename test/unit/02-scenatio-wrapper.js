@@ -326,5 +326,20 @@ describe('Scenario wrapper', function() {
           .callAfterFun().should.eventually.equal('ok');
       });
     });
+
+    describe('callActionFun(), Call scenario "after" function',function() {
+      it('using callback', function() {
+        return new ScenarioWrapper({}, {action: function() {
+          return 'ok';
+        }})
+          .callActionFun().should.eventually.equal('ok');
+      });
+
+      it('using <% %>', function() {
+        let api = this.api;
+        return new ScenarioWrapper(api, {action: "<% return_ok %>"})
+          .callActionFun().should.eventually.equal('ok');
+      });
+    });
   });
 });
