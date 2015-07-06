@@ -184,6 +184,31 @@ describe('Scenario wrapper', function() {
     });
   });
 
+  describe('getTTL(), property ttl',function() {
+    it('should return 0 if not set by scenario', function() {
+      return new ScenarioWrapper({}, {})
+        .getTTL().should.eventually.equal(0);
+    });
+
+    it('should return valure set by scenario ttl property', function() {
+      return new ScenarioWrapper({}, {ttl: 999})
+        .getTTL().should.eventually.equal(999);
+    });
+
+    it('should support <% %>', function() {
+      let api = {
+        TTL: function() { return 777; }
+      };
+      return new ScenarioWrapper(api, {ttl: '<% TTL %>'})
+        .getTTL().should.eventually.eql(777);
+    });
+
+    it('should return 0 if string set by scenario ttl property', function() {
+      return new ScenarioWrapper({}, {ttl: '10'})
+        .getTTL().should.eventually.equal(0);
+    });
+  });
+
   describe('Promise and async as callback in api', function() {
     before(function() {
       // simple sleep promise and resolve return msg

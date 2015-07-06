@@ -109,6 +109,8 @@ function Scenario(api, scenario) {
 
     menu               : one_of_str_or_array,
 
+    ttl                : number,
+
     before             : fun,
     action             : fun,
     after              : fun,

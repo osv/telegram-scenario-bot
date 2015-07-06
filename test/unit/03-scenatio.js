@@ -153,6 +153,7 @@ describe('Scenario class', function(){
           script_quit = this.script_quit = {
             name: "quit",
             reply: "Quit?",
+            ttl: 20,
             menu: [
               ['yes', 'no'],
               ['cancel']

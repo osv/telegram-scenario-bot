@@ -48,6 +48,12 @@ ScenarioWrapper.prototype = {
     return await this._callFunction(value, context, args);
   },
 
+  _asNumber: async function (value, context, args) {
+    if (_.isNumber(value))
+      return value;
+    return +await this._callFunction(value, context, args);
+  },
+
   // if value is string, replace <% %> with callback result
   _asString: async function(value, context, args) {
     if (_.isFunction(value))
@@ -138,7 +144,19 @@ ScenarioWrapper.prototype = {
    */
   getName: function() {
     let scenario = this.getScenario();
+    // dont need await, we don't support async function for "name" property of scenario
     return scenario.name;
+  },
+
+  /**
+   * Get scenario time to live, if expire ttl, than return to root menu
+   */
+  getTTL: async function(context, args) {
+    let scenario = this.getScenario(),
+        ttl_value = scenario.ttl,
+        result = await this._asNumber(ttl_value, context, args);
+
+    return +result;
   }
 };
 
