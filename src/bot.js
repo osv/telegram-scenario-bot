@@ -8,6 +8,8 @@ import Scenario from './scenario.js';
 import _ from 'underscore';
 import path from 'path';
 
+const DEFAULT_SESSION_TTL = 30 * 60 * 1000;
+
 function Bot(token) {
   // composite
   this._tel_api = new BotApi(token);
@@ -21,6 +23,7 @@ function Bot(token) {
 
   this._messages = [];
   this._offset = 0;
+  this._ttl = DEFAULT_SESSION_TTL;
 
   this._user_reply_locks = {};  // store user id when worker started
 }
@@ -31,6 +34,14 @@ Bot.prototype = {
       return this._scenario;
     }
     this._scenario = new_scenario;
+    return this;
+  },
+
+  sessionTTL(new_ttl) {
+    if (_.isUndefined(new_ttl)) {
+      return this._ttl;
+    }
+    this._ttl = new_ttl;
     return this;
   },
 
@@ -212,7 +223,8 @@ Bot.prototype = {
     }
 
     // save session
-    await state_holder.put(from_id, state, ttl || 5 * 60 * 1000);
+    let default_ttl = this.sessionTTL();
+    await state_holder.put(from_id, state, ttl || default_ttl);
     console.log('path:',state.scenario_path);
   },
 
