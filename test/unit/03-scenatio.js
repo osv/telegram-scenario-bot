@@ -160,7 +160,12 @@ describe('Scenario class', function(){
             ],
             commands: {
               yes: {
-                name: 'yes'
+                name: 'yes',
+                commands: {
+                  comfirm: {
+                    name: 'comfirm'
+                  }
+                },
               },
               'no': {
                 name: 'no'
@@ -208,6 +213,12 @@ describe('Scenario class', function(){
         .to.throw('Cannot find scenario: "foo" in "/root"');
 
       expect(s.getScenario).bind(s).called('/root/quit-force/')
+        .to.not.throw();
+
+      expect(s.getScenario).bind(s).called('/root/quit/yes/comfirm')
+        .to.not.throw();
+
+      expect(s.getScenario).bind(s).called('/quit/yes/comfirm')
         .to.not.throw();
 
       expect(s.getScenario).bind(s).called('/root/quit-force/bar')
