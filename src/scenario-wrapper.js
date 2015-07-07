@@ -57,7 +57,7 @@ ScenarioWrapper.prototype = {
   // if value is string, replace <% %> with callback result
   _asString: async function(value, context, args) {
     if (_.isFunction(value))
-      return '' + await value.apply(context, args);
+      return await value.apply(context, args) || '';
 
     if (_.isString(value)) {
       // Need to say, I dont know how to use async function
@@ -84,7 +84,7 @@ ScenarioWrapper.prototype = {
 
       // call founded functions
       for(let f of fun_to_call) {
-        let res = await f.apply(context, args);
+        let res = await f.apply(context, args) || '';
         fun_call_results.push(res);
       }
 
