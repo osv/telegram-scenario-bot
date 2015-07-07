@@ -136,7 +136,7 @@ describe('Scenario class', function(){
       };
 
       expect(() => { new Scenario({}, scenario2); })
-        .to.throw('"scenario.commands."/help".typing" must be boolean or function');
+        .to.throw('"[[root]].commands."/help".typing" must be boolean or function');
     });
   });
 

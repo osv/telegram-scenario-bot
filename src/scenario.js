@@ -160,7 +160,7 @@ Scenario.prototype = {
   },
 
   validate(scenario) {
-    this._scenario_validator('scenario', scenario);
+    this._scenario_validator('[[root]]', scenario);
   },
 
   /**
