@@ -6,6 +6,7 @@ import StateHolder from './state-holder.js';
 import Scenario from './scenario.js';
 
 import _ from 'underscore';
+import path from 'path';
 
 function Bot(token) {
   // composite
@@ -103,44 +104,106 @@ Bot.prototype = {
       await this._processMessage(data);
 
     } catch (err) {
-      console.log(`Error while processing message. Message:`,
-                  msg,
+      let state_holder = this.stateHolder(),
+          user_state = await state_holder.get(from_id);
+      console.log(`Error while processing message.\n`,
+                  'Message:',  msg, '\n',
+                  'User state:', user_state, '\n',
                   `\nTrace: ${err.stack}`);
     }
     this._unlock_user(from_id);
   },
 
+  _buildContext: function(data) {
+    return {
+      stash: {},
+    };
+  },
+
   _processMessage: async function(data) {
     var msg = data.message,
+        text_msg = msg.text,
         from = msg.from,
         from_id = from.id,
         chat = msg.chat,
         chat_id = chat.id,
         state_holder = this.stateHolder(),
-        state = state_holder.get(from_id);
+        telegram = this.telegramApi(),
+        context = this._buildContext(data);
 
+    var state = await state_holder.get(from_id);
     state = state || {};
+    console.log('STATE BEFORE:', state);
 
     if (! state.scenario_path) {
       state.scenario_path = '/';
     }
 
-    let scenario = this._getScenario(state.scenario_path);
+    // get wrapped scenario object
+    let current_scen = this._getScenario(state.scenario_path);
 
-    let reply_msg = await scenario.getReply();
+    // match message text, and try find next sub scenario
+    let next_scen = current_scen.getNextScenario(text_msg);
 
-    let api = this.telegramApi();
+    // fallback to root if not found sub scenario
+    if (next_scen === null) {
+      next_scen = this._getScenario('/');
+    }
+
+    console.log('resolved scene:', next_scen);
+
+
+    // call 'before' function
+    await next_scen.callBeforeFun(context);
+
+    // typing, uploading_foto, etc
+    let action = await next_scen.getAction(context);
+    if (action) {
+      await telegram.sendChatAction(chat_id, action);
+    }
+
+    // call 'action' function
+    await next_scen.callActionFun(context);
+
+    let reply_msg = await next_scen.getReply(context);
 
     if (! _.isEmpty(reply_msg) /*|| menu */) {
-      await api.sendMessage(chat_id,
+      await telegram.sendMessage(chat_id,
                             reply_msg
                            );
     }
+
+    let ttl = await next_scen.getTTL(context);
+
+    // resolve next scenario path, fallback to "/" if not exist path
+    let goto = await next_scen.getGoto(context);
+    state.scenario_path =
+      this._getValidPath(path.join(state.scenario_path, goto));
+
+    // save session
+    await state_holder.put(from_id, state, ttl);
+
+    console.log('STATE AFTER:', state);
+    // call 'after' function
+    await next_scen.callAfterFun(context);
   },
 
   _getScenario: function(path) {
     var s = this.scenario();
     return s.getScenario(path);
+  },
+
+  _getValidPath: function(path) {
+    var s = this.scenario(),
+        res;
+    try {
+      s.getScenario(path);      // may throw here
+      res = path;
+    } catch(e) {
+      res = '/';
+      console.trace(`!! Scenario use invalid path: "${path}". Fallback to "/"\n`);
+    }
+    return res;
   },
 
   _lock_user: function(user_id) {
