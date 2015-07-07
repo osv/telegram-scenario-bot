@@ -198,6 +198,27 @@ ScenarioWrapper.prototype = {
   },
 
   /**
+   * Get path for next scenario from "goto" property of scenario.
+   * If no "goto" and no "commands" property, return root - "/".
+   * If no "goto" and exists "commands" property - return './'
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {string} path. As "goto" is dynamic param, here no validation done.
+   * Validation will be in bot.js
+   */
+  getGoto: async function(context, args) {
+    let scenario = this.getScenario(),
+        commands = scenario.commands,
+        goto = scenario.goto;
+
+    if (_.isUndefined(goto)) {
+      return _.isUndefined(commands) ? '/' : '.';
+    } else {
+      return await this._asString(goto, context, args);
+    }
+  },
+
+  /**
    * Get sub-scenario depend on given command text. Commands is regexp patterns for match next scenario.
    * Pattern "." is special case, it will be matched LAST.
    * @param {string} text

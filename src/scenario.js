@@ -115,6 +115,8 @@ function Scenario(api, scenario) {
     action             : fun,
     after              : fun,
 
+    goto               : string,
+
     commands           : command
   };
 

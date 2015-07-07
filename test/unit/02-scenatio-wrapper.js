@@ -383,6 +383,42 @@ describe('Scenario wrapper', function() {
       expect(default_w, '"foo bar" matched by "." pattern').to.be.an.instanceof(ScenarioWrapper);
       default_w.getName().should.be.equal('default');
     });
+  });
+  describe('"goto" property, getGoto()', function() {
+    it('should return "/" as default if no "goto" prop', function() {
+      return new ScenarioWrapper({}, {})
+        .getGoto().should.eventually.equal('/');
+    });
+
+    it('should return "." as default if no "goto" prop', function() {
+      return new ScenarioWrapper({}, {commands: {}})
+        .getGoto().should.eventually.equal('.');
+    });
+
+    it('should return string if defined in scenario', function() {
+      return new ScenarioWrapper({}, {goto: '/help/usage'})
+        .getGoto().should.eventually.equal('/help/usage');
+    });
+
+    it('should support cb', function() {
+      return new ScenarioWrapper({}, {goto: function() {
+        return '/foo/bar';
+      }})
+        .getGoto().should.eventually.equal('/foo/bar');
+    });
+
+    it('should support async cb', function() {
+      return new ScenarioWrapper({}, {goto: async function() {
+        return '/foo/bar';
+      }})
+        .getGoto().should.eventually.equal('/foo/bar');
+    });
+
+    it('should support <% %>', function() {
+      let api = { getPath: () => '/foo/bar'};
+      return new ScenarioWrapper(api, {goto: '..<% getPath %>'})
+        .getGoto().should.eventually.equal('../foo/bar');
+    });
 
   });
 });
