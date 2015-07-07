@@ -225,7 +225,6 @@ ScenarioWrapper.prototype = {
    * @return {ScenarioWrapper|null} next scenario
    */
   getNextScenario: function(text) {
-    // get commands
     var scenario = this.getScenario(),
         commands = scenario.commands,
         api = this._api,
@@ -252,6 +251,31 @@ ScenarioWrapper.prototype = {
     }
     return null;
   },
+
+  /**
+   * Get array of array of strings from "menu" property.
+   * if "menu" is string, split it to new lines - rows, which will be split by "||" for cols
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {arrayOfArray} array of array if "menu" is string, otherwise no checks and passed as is.
+   * There no validation, we excpect "menu" is valid and containe (array of array of str) or (string).
+   */
+  getMenu: async function(context, args) {
+    var scenario = this.getScenario(),
+        menu = scenario.menu;
+
+    if (_.isString(menu)) {
+      let compiled_menu_str = await this._asString(menu, context, args);
+      let menu_rows = compiled_menu_str.split(/\n+/);
+      menu_rows = _.chain(menu_rows)
+        .map(function(row) { return row.split(/\s*\|\|\s*/); })
+        .filter(function(row) { return row.length !== 1 || row[0] !== ''; })
+        .value();
+
+      menu = menu_rows;
+    }
+    return menu;
+  }
 };
 
 export default ScenarioWrapper;

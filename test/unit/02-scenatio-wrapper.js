@@ -421,4 +421,56 @@ describe('Scenario wrapper', function() {
     });
 
   });
+
+  describe('"menu" property, getMenu()', function() {
+    it('should return array of array from string', function() {
+      let scenario = {
+        menu: `yes || no
+cancel`
+      },
+          expected = [
+            ['yes', 'no'],
+            ['cancel']
+          ];
+      return new ScenarioWrapper({}, scenario)
+        .getMenu().should.eventually.deep.equal(expected);
+    });
+
+    it('should remove empry rows', function() {
+      let scenario = {
+        menu: `yes || no
+
+
+cancel
+`
+      },
+          expected = [
+            ['yes', 'no'],
+            ['cancel']
+          ];
+      return new ScenarioWrapper({}, scenario)
+        .getMenu().should.eventually.deep.equal(expected);
+    });
+
+    it('should support callbacks', function() {
+      let scenario = {
+        menu: '<% cols1 %>\n' +
+          '<% empty %>\n' +
+          '<% cols2 %>\n' +
+          'more'
+      },
+          api = {
+            cols1() { return 'yes || no';},
+            empty() { return ;},
+            cols2() {return 'cancel';}
+          },
+          expected = [
+            ['yes', 'no'],
+            ['cancel'],
+            ['more']
+          ];
+      return new ScenarioWrapper(api, scenario)
+        .getMenu().should.eventually.deep.equal(expected);
+    });
+  });
 });
