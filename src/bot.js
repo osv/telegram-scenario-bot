@@ -115,7 +115,16 @@ Bot.prototype = {
   },
 
   _buildContext: function(data) {
+    var msg = data.message,
+        text = msg.text,
+        from = msg.from,
+        from_id = from.id,
+        chat = msg.chat,
+        chat_id = chat.id;
     return {
+      text: text,
+      from: from,
+      chat: chat,
       stash: {},
     };
   },
@@ -133,7 +142,6 @@ Bot.prototype = {
 
     var state = await state_holder.get(from_id);
     state = state || {};
-    console.log('STATE BEFORE:', state);
 
     if (! state.scenario_path) {
       state.scenario_path = '/';
@@ -145,13 +153,12 @@ Bot.prototype = {
     // match message text, and try find next sub scenario
     let next_scen = current_scen.getNextScenario(text_msg);
 
-    // fallback to root if not found sub scenario
+    // if not found sub scenario, keep current scenario
     if (next_scen === null) {
-      next_scen = this._getScenario('/');
+      next_scen = current_scen;
+    } else {
+      state.scenario_path += '/' + next_scen.getName();
     }
-
-    console.log('resolved scene:', next_scen);
-
 
     // call 'before' function
     await next_scen.callBeforeFun(context);
@@ -163,29 +170,50 @@ Bot.prototype = {
     }
 
     // call 'action' function
-    await next_scen.callActionFun(context);
+    let action_result = await next_scen.callActionFun(context);
 
-    let reply_msg = await next_scen.getReply(context);
-
-    if (! _.isEmpty(reply_msg) /*|| menu */) {
-      await telegram.sendMessage(chat_id,
-                            reply_msg
-                           );
-    }
-
+    // ttl
     let ttl = await next_scen.getTTL(context);
 
-    // resolve next scenario path, fallback to "/" if not exist path
-    let goto = await next_scen.getGoto(context);
-    state.scenario_path =
-      this._getValidPath(path.join(state.scenario_path, goto));
+    if (_.isString(action_result)) {
+
+      state.scenario_path =
+        this._getValidPath(path.join(state.scenario_path, '..'));
+
+      // call current scenario.
+      await current_scen.callBeforeFun(context);
+
+      //TODO: menu
+
+      // reply
+      await telegram.sendMessage(chat_id,
+                                 action_result
+                                );
+    } else {
+      let reply_msg = await next_scen.getReply(context);
+
+      if (! _.isEmpty(reply_msg) /*|| menu */) {
+        await telegram.sendMessage(chat_id,
+                                   reply_msg
+                                  );
+      }
+
+      // resolve next scenario path, fallback to "/" if not exist path
+      let goto = await next_scen.getGoto(context);
+      if (goto.charAt(0) === '/') {
+        state.scenario_path = goto;
+      } else {
+        state.scenario_path =
+          this._getValidPath(path.join(state.scenario_path, goto));
+      }
+
+      // call 'after' function
+      await next_scen.callAfterFun(context);
+    }
 
     // save session
-    await state_holder.put(from_id, state, ttl);
-
-    console.log('STATE AFTER:', state);
-    // call 'after' function
-    await next_scen.callAfterFun(context);
+    await state_holder.put(from_id, state, ttl || 5 * 60 * 1000);
+    console.log('path:',state.scenario_path);
   },
 
   _getScenario: function(path) {
@@ -193,6 +221,7 @@ Bot.prototype = {
     return s.getScenario(path);
   },
 
+  // check if exist path, if no, return '/' otherwise return path
   _getValidPath: function(path) {
     var s = this.scenario(),
         res;
