@@ -11,6 +11,7 @@ describe("validators function:", function() {
         v = new Validator(api),
         fun = v.fun.bind(v);
 
+    expect(fun).called('foo', null).to.throw('must be function');
     expect(fun).called('foo', true).to.throw('must be function');
     expect(fun).called('foo', false).to.throw('must be function');
 
