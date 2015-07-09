@@ -1,0 +1,120 @@
+# some nodes may be resuable via anhors
+reusable commands:
+  # just show cancel message
+  cancel: &CANCEL
+    name: cancel
+    reply: Canceled
+  back: &BACK
+    name: back
+    goto: ../..
+
+reusable menus:
+  number_select: &NUMBER_SELECT |
+    0  || 50 || 80
+    15 || 65 || 90
+    30 || 75 || 100
+    back  || cancel
+
+
+# we load our yaml and get "scenario"
+scenario:
+  name: root
+  menu: |
+    /audio
+    /video
+    /about
+  reply: |
+    <% username %>, choose setting you want to set
+    /audio - audio settings
+    /video - video settings
+  commands:
+    /about|about:
+      name: about
+      reply: |
+        ❓ This is demo telegram bot that allow you use scenario based interface
+
+        This example imitate game settings.
+
+        Source can be found https://github.com/osv/telegram-bot
+    /v|video:
+      name: video
+      reply: |
+        Video settings
+
+        /resolution - setup resolution
+        Use /cancel for cancel; /back return
+      menu: |
+        /resolution
+        /back || /cancel
+      commands:
+        /cancel|cancel: *CANCEL
+        /back|back: *BACK
+        /resolution|res:
+          name: resolution
+          before: <% setupStash %>
+          reply: |
+            Now video resolution is <% currentResolution %>
+            Enter new resolution, like "800x600"
+          menu: |
+            <% listKnownResolution %>
+            /back || /cancel
+          commands:
+            /cancel|cancel: *CANCEL
+            /back|back: *BACK
+            .:
+              name: set-resolusion
+              before: <% setupStash %>
+              action: <% setVideoResolution %>
+              reply: "Resolution set to <% currentResolution %> ✅"
+    /a|audio:
+      name: audio
+      before: <% setupStash %>
+      reply: |
+        Audio settings
+
+        /music - set music level (<%currentMusicLvl %>)
+        /ambient - set ambient level (<% currentAmbientLvl %>)
+        Use /cancel for cancel; /back return
+      menu: |
+        /music
+        /ambient
+        /back || /cancel
+      commands:
+        /music|music:
+          name: music
+          before: <% setupStash %>
+          reply: |
+            Current music level is <% currentMusicLvl %>%
+            Enter new level
+          menu: *NUMBER_SELECT
+          commands:
+            /cancel|cancel: *CANCEL
+            /back|back: *BACK
+            .:
+              name: set-music-level
+              before: <% setupStash %>
+              action: <% setMusicLvl %>
+              reply: "Music level set to <% currentMusicLvl %>% ✅"
+              # current is /audio/music/set-music-level
+              # goto '/audio'. You may use 'goto: /audio' instead
+              goto: /audio
+        /ambient|ambient:
+          name: ambient
+          before: <% setupStash %>
+          reply: |
+            Current ambient level is <% currentAmbientLvl %>%
+            Enter new level
+          menu: *NUMBER_SELECT
+          commands:
+            /cancel|cancel: *CANCEL
+            /back|back: *BACK
+            .:
+              name: set-ambient-level
+              before: <% setupStash %>
+              action: <% setAmbientLvl %>
+              reply: "Music level set to <% currentAmbientLvl %>% ✅"
+              # current is /audio/music/set-music-level
+              # goto '/audio'. You may use 'goto: /audio' instead
+              goto: /audio
+        /cancel: *CANCEL
+        /back: *BACK
