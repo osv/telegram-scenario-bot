@@ -77,8 +77,8 @@ Telegram bot api have unique feature - custom keyboards, good way to create scen
 Old way of bot creating may be not so comfortable if you want use multilevel custom keyboards.
 
 
-[travis-url]: https://travis-ci.org/osv/telegram-bot
-[travis-image]: http://img.shields.io/travis/osv/telegram-bot.svg
+[travis-url]: https://travis-ci.org/osv/telegram-scenario-bot
+[travis-image]: http://img.shields.io/travis/osv/telegram-scenario-bot.svg
 
-[coveralls-url]: https://coveralls.io/r/osv/telegram-bot
-[coveralls-image]: http://img.shields.io/coveralls/osv/telegram-bot/master.svg
+[coveralls-url]: https://coveralls.io/r/osv/telegram-scenario-bot
+[coveralls-image]: http://img.shields.io/coveralls/osv/telegram-scenario-bot/master.svg
