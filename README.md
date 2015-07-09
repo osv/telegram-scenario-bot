@@ -82,8 +82,11 @@ Telegram bot api have unique feature - custom keyboards, good way to create scen
 Old way of bot creating may be not so comfortable if you want use multilevel custom keyboards.
 
 This bot use job queue, messages from user ignored when processing message for this user not done.
+Default is 2 concurent jobs.
 
-Default is 2 concurent jobs. All callbacks must be thanable, i.e es7 async function or Promise.
+Callbacks may be thanable i.e. es7 async function or Promise. See "examples/google" for async demo.
+
+Group chat, privacy mode not tested.
 
 ## SCENARIO SCHEMA
 
@@ -231,6 +234,11 @@ fooAction: async function() {
 - `telegramPollingTimout(timeout)` - Setter/getter for timeout of telegram longpolling, default 1min.
 - `jobQueue()` - get job queue. Example: `bot.jobQueue.maxConcurentJobs(8)`
 - `start()` - start polling
+
+## TODO
+
+- [ ] Write test for bot core behavior. Don't look for 100% coverage, it covered only scenario validator. Behavior still is subject of change.
+- [ ] Test group chat
 
 [travis-url]: https://travis-ci.org/osv/telegram-scenario-bot
 [travis-image]: http://img.shields.io/travis/osv/telegram-scenario-bot.svg
