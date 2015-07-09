@@ -9,6 +9,7 @@ import _ from 'underscore';
  * string like "<% abc %>" (Here abc.apply(context, arguments) will be called).
  * @param {object} api object that hold all known api for using in <% %>
  * @param {object} scenario - scenario node.
+ * @constructor
  */
 function ScenarioWrapper(api, scenario) {
   this._api = api;
@@ -128,6 +129,19 @@ ScenarioWrapper.prototype = {
   /**
    * Get msg for reply from scenario. Call callback if need,
    * interpolate result api like "<% foo %>".
+   *
+   * Delimiter  \n={2,}\n used to random select one of item.
+   * Interpolation will be done AFTER selecting,
+   * instead of getMenu(), where first - interpolated, then split by "\n" and "||"
+   * @example
+   * await new ScenarioWrapper({}, {
+   *   reply: `item1
+   * ==
+   * item2
+   * ==
+   * item3` })
+   *   .getReply(); // return "item1", or "item2" or "item3"
+   *
    * @param {object} context - this for callbacks
    * @param {array} args - arguments for callbacks
    * @returns {string} Reply text. "reply" field of scenario.
@@ -135,6 +149,13 @@ ScenarioWrapper.prototype = {
   getReply: async function(context, args) {
     let scenario = this.getScenario(),
         reply_value = scenario.reply;
+
+    if (_.isString(reply_value)) {
+      let replies = reply_value.split(/(?:\n={2,}\n)+/),
+          replies_size = replies.length,
+          selected = Math.floor(replies_size * Math.random());
+      reply_value = replies[selected];
+    }
     return await this._asString(reply_value, context, args);
   },
 

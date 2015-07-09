@@ -143,6 +143,19 @@ describe('Scenario wrapper', function() {
         .getReply().should.eventually.eql('Hello');
     });
 
+    it('should return random from splitted by "\n=="', function() {
+      return new ScenarioWrapper({}, {reply: `item1
+==
+item2
+==
+item3` })
+        .getReply().should.eventually.satisfy(function(text) {
+          return (text.split(/\n/).length === 1 &&
+                  text.match(/^item/));
+        });
+
+    });
+
     it('using callback', function() {
       return new ScenarioWrapper({}, {reply: () => 'Hello'})
         .getReply().should.eventually.eql('Hello');
