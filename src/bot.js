@@ -146,7 +146,13 @@ Bot.prototype = {
     };
   },
 
-  // return user state, if not exist, create default with scenario path "/"
+  /**
+   * Get session for user.
+   * If not exist, create default with scenario path "/"
+   * If user in root scenario, reset session.
+   * @param {string} user_id
+   * @returns {object}
+   */
   _getUserSession: async function(user_id) {
     var state_holder = this.stateHolder();
     var state = await state_holder.get(user_id);
@@ -288,6 +294,8 @@ Bot.prototype = {
         chat_id = chat.id,
         telegram = this.telegramApi();
     console.log(data);
+
+    //TODO: there may be other types of message, maybe need ignore non text message by default
 
     var state = await this._getUserSession(from_id);
     var user_context = this._buildUserContext(data, state.session);
