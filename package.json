@@ -1,6 +1,6 @@
 {
-  "name": "todo",
-  "version": "0.0.1",
+  "name": "telegram-scenario-bot",
+  "version": "0.1.0",
   "description": "Framework for Telegram bot",
   "main": "lib/index.js",
   "scripts": {
@@ -14,6 +14,10 @@
     "es6",
     "node"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/osv/telegram-scenario-bot.git"
+  },
   "author": "Olexandr Sydorchuk",
   "license": "MIT",
   "devDependencies": {
