@@ -155,6 +155,13 @@ Bot.prototype = {
 
     if (! state.scenario_path) {
       state.scenario_path = '/';
+    } else {
+      var root_scenario = this._getScenario('/'),
+          that_scenario = this._getScenario(state.scenario_path);
+      if (root_scenario === that_scenario) {
+        state.session = {};
+      }
+
     }
 
     if (! state.state) {
