@@ -354,6 +354,13 @@ describe('Scenario wrapper', function() {
               '/list': {name: 'list'},
             }
           },
+          '/audio': {
+            commands: {
+              '/music|music': {name: 'music'},
+              '/ambient|ambient': {name: 'ambient'},
+              '.': {name: 'default'},
+            }
+          }
         }
       };
     });
@@ -383,6 +390,20 @@ describe('Scenario wrapper', function() {
       expect(default_w, '"foo bar" matched by "." pattern').to.be.an.instanceof(ScenarioWrapper);
       default_w.getName().should.be.equal('default');
     });
+
+    it('should "." match last', function() {
+      let scenario = this.scenario,
+          s = new ScenarioWrapper({}, scenario),
+          audio = s.getNextScenario('/audio'),
+          ambient = audio.getNextScenario('ambient'),
+          music = audio.getNextScenario('/music');
+
+      expect(ambient).to.be.an.instanceof(ScenarioWrapper);
+      expect(music).to.be.an.instanceof(ScenarioWrapper);
+      ambient.getName().should.be.equal('ambient');
+      music.getName().should.be.equal('music');
+    });
+
   });
   describe('"goto" property, getGoto()', function() {
     it('should return "/" as default if no "goto" prop', function() {

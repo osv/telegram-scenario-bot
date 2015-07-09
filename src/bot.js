@@ -125,19 +125,151 @@ Bot.prototype = {
     this._unlock_user(from_id);
   },
 
-  _buildContext: function(data) {
+  _buildUserContext: function(data, session) {
     var msg = data.message,
         text = msg.text,
         from = msg.from,
-        from_id = from.id,
         chat = msg.chat,
-        chat_id = chat.id;
+        telegram = this.telegramApi();
     return {
+      // fast accesors to message field
       text: text,
       from: from,
       chat: chat,
+
+      // message
+      message: data,
+
       stash: {},
+      session: session || {},
+      telegramApi: telegram,
     };
+  },
+
+  // return user state, if not exist, create default with scenario path "/"
+  _getUserSession: async function(user_id) {
+    var state_holder = this.stateHolder();
+    var state = await state_holder.get(user_id);
+
+    state = state || {};
+
+    if (! state.scenario_path) {
+      state.scenario_path = '/';
+    }
+
+    if (! state.state) {
+      state.state = {};
+    }
+    return state;
+  },
+
+  _saveUserSession: async function(user_id, context) {
+    // save state
+    var user_context = context.user_context,
+        state = {
+          scenario_path: context.path,
+          session: user_context.session
+        },
+        state_holder = this.stateHolder(),
+        default_ttl = this.sessionTTL();
+
+    var scen_state_ttl = await this._getScenario(context.path).getTTL(user_context);
+
+    await state_holder.put(user_id, state, scen_state_ttl || default_ttl);
+  },
+
+  /**
+   * Select next scenario based on text.
+   *
+   * Modify context.path or leave as is if this scenario not match any item in "commands"
+   * @param {object} context
+   * @param {string} text user message text
+   */
+  _resolveScenario: function(context, text) {
+    var scen_path = context.path,
+        current_scen = this._getScenario(scen_path),
+
+        // match message text, and try find next sub scenario
+        next_scen = current_scen.getNextScenario(text);
+
+    // if not found sub scenario, keep current scenario
+    if (next_scen !== null) {
+      context.path  += '/' + next_scen.getName();
+    }
+  },
+
+  /**
+   * Send to user activity type (typing, etc) if need
+   * @param {object} context
+   * @returns {string|undefined} Result of "action" function
+   */
+  _sendActionMaybe: async function(context) {
+    var telegram = this.telegramApi(),
+        user_context = context.user_context,
+        chat_id = user_context.from.id,
+        scenario = this._getScenario(context.path);
+
+    var action = await scenario.getAction(user_context);
+    if (action) {
+      await telegram.sendChatAction(chat_id, action);
+    }
+  },
+
+  /**
+   * Send to user activity type (typing, etc, if need)
+   * and call "action" function of scenario
+   * @param {object} context
+   * @returns {string|undefined} Result of "action" function
+   */
+  _callActionFun: async function(context) {
+    var user_context = context.user_context,
+        scenario = this._getScenario(context.path);
+
+    // call 'action' function
+    var action_error_message = await scenario.callActionFun(user_context);
+    return action_error_message;
+  },
+
+  /**
+   * Return scenario menu.
+   * @param {object} context
+   * @returns {object|null} Telegram custom keyboard object if scenario "menu" not defined
+   */
+  _getMenuFromPath: async function (context) {
+    var scen_path = context.path,
+        scenario = this._getScenario(scen_path),
+        user_context = context.user_context;
+
+    var scen_menu = await scenario.getMenu(user_context);
+
+    if (_.isUndefined(scen_menu)) {
+      return null;
+    }
+
+    var menu = {
+          keyboard: scen_menu,
+          one_time_keyboard: true,
+          resize_keyboard: true
+        };
+
+    return menu;
+  },
+
+  _resolvePath: async function(context) {
+    var scen_path = context.path,
+        scenario = this._getScenario(context.path),
+        user_context = context.user_context;
+
+    // return "/" or value of "goto" scenario field
+    let new_path = await scenario.getGoto(user_context);
+
+    // concat if not absolute path
+    if (new_path.charAt(0) !== '/') {
+      new_path = path.join(scen_path, new_path);
+    }
+
+    // change context path
+    context.path = this._getValidPath(new_path);
   },
 
   _processMessage: async function(data) {
@@ -147,85 +279,79 @@ Bot.prototype = {
         from_id = from.id,
         chat = msg.chat,
         chat_id = chat.id,
-        state_holder = this.stateHolder(),
-        telegram = this.telegramApi(),
-        context = this._buildContext(data);
+        telegram = this.telegramApi();
+    console.log(data);
 
-    var state = await state_holder.get(from_id);
-    state = state || {};
+    var state = await this._getUserSession(from_id);
+    var user_context = this._buildUserContext(data, state.session);
 
-    if (! state.scenario_path) {
-      state.scenario_path = '/';
+    // this context object used by other functions and some part of this may be modified, like "path"
+    var context = {
+      user_context: user_context, // this user_context for Scenario Wrapper methods
+      path: state.scenario_path,  // scenario path
+    };
+
+    // check "commands" prop of scenario
+    if (! _.isUndefined(text_msg)) {
+      this._resolveScenario(context, text_msg);
     }
+    // "before" property
+    await this._getScenario(context.path).callBeforeFun(user_context);
 
-    // get wrapped scenario object
-    let current_scen = this._getScenario(state.scenario_path);
+    // send bot action: typing, upload_photo, etc
+    await this._sendActionMaybe(context);
 
-    // match message text, and try find next sub scenario
-    let next_scen = current_scen.getNextScenario(text_msg);
+    // "action" property
+    var action_error_message = await this._callActionFun(context);
 
-    // if not found sub scenario, keep current scenario
-    if (next_scen === null) {
-      next_scen = current_scen;
+    var reply_msg,
+        current_path = context.path; // we save path, need track changing later
+
+    // looks next scenario fail to process, fallback to current
+    if (_.isString(action_error_message)) {
+      // reply will be next scenario's action function result
+      reply_msg = action_error_message;
+
+      // go up
+      context.path = this._getValidPath(path.join(current_path, '..'));
     } else {
-      state.scenario_path += '/' + next_scen.getName();
-    }
-
-    // call 'before' function
-    await next_scen.callBeforeFun(context);
-
-    // typing, uploading_foto, etc
-    let action = await next_scen.getAction(context);
-    if (action) {
-      await telegram.sendChatAction(chat_id, action);
-    }
-
-    // call 'action' function
-    let action_result = await next_scen.callActionFun(context);
-
-    // ttl
-    let ttl = await next_scen.getTTL(context);
-
-    if (_.isString(action_result)) {
-
-      state.scenario_path =
-        this._getValidPath(path.join(state.scenario_path, '..'));
-
-      // call current scenario.
-      await current_scen.callBeforeFun(context);
-
-      //TODO: menu
-
-      // reply
-      await telegram.sendMessage(chat_id,
-                                 action_result
-                                );
-    } else {
-      let reply_msg = await next_scen.getReply(context);
-
-      if (! _.isEmpty(reply_msg) /*|| menu */) {
-        await telegram.sendMessage(chat_id,
-                                   reply_msg
-                                  );
+      // get reply message of new scenario, only get text message
+      if (! _.isUndefined(text_msg)) {
+        reply_msg = await this._getScenario(context.path).getReply(user_context);
       }
 
       // resolve next scenario path, fallback to "/" if not exist path
-      let goto = await next_scen.getGoto(context);
-      if (goto.charAt(0) === '/') {
-        state.scenario_path = goto;
-      } else {
-        state.scenario_path =
-          this._getValidPath(path.join(state.scenario_path, goto));
-      }
-
-      // call 'after' function
-      await next_scen.callAfterFun(context);
+      await this._resolvePath(context);
     }
 
-    // save session
-    let default_ttl = this.sessionTTL();
-    await state_holder.put(from_id, state, ttl || default_ttl);
-    console.log('path:',state.scenario_path);
+    // if we changed scenario, call "before" function for new scenario for this one
+    // and maybe get reply
+    if (current_path !== context.path) {
+      await this._getScenario(context.path).callBeforeFun(user_context);
+
+      // if we change scenario, we may try again get reply message
+      if (! _.isString(reply_msg) && ! _.isUndefined(text_msg)) {
+        reply_msg = await this._getScenario(context.path).getReply(user_context);
+      }
+    }
+
+    let menu = await this._getMenuFromPath(context);
+
+    if (! _.isEmpty(reply_msg)) {
+      let args = [chat_id, reply_msg, true, 0];
+
+      if (_.isEmpty(menu)) {
+        args.push({hide_keyboard: true}); // hide last menu
+      } else {
+        args.push(menu);
+      }
+
+      await telegram.sendMessage.apply(telegram, args);
+    }
+
+    await this._saveUserSession(from_id, context);
+
+    console.log('path:',context.path);
   },
 
   _getScenario: function(path) {
