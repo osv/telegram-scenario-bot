@@ -10,6 +10,68 @@ import path from 'path';
 
 const DEFAULT_SESSION_TTL = 30 * 60 * 1000;
 
+/**
+ * Create Telegram bot.
+
+ * @param {string} token Telegram bot api token, see https://core.telegram.org/bots
+ * @example
+ * var search = async function() {
+ *   var user_text = this.text,
+ *       stash = this.stash;
+ *
+ *   // do search here...
+ *
+ *   stash.result = search_result;
+ * };
+ *
+ * var script = {
+ *   name: 'root',
+ *   reply: 'Usage:\n'+
+ *     '/google - search in google\n'+
+ *     '/about - about bot',
+ *   menu: [
+ *     ['/google'],
+ *     ['/about'],
+ *   ],
+ *   commands: {
+ *     "/about": {
+ *       name: 'about',
+ *       reply: 'This is telegram bot demo.\n'
+ *     },
+ *     "/google|google": {
+ *       name: 'google',
+ *       reply: "Enter search query?",
+ *       commands: {
+ *         ".": {
+ *           name: "searchResult",
+ *           action: search,       // you may use function
+ *           reply: "Result of search\n<% searchResult %>" // or interpolate in <% %>
+ *         }
+ *       }
+ *     }
+ *   }
+ * };
+ *
+ * var botApi = {
+ *   searchResult: function() { return this.stash.result; }
+ * };
+ *
+ * var scenario = new Scenario(botApi, script);
+ *
+ * var token = process.env.BOT_TOKEN;
+ *
+ * if (!token) {
+ *   console.error(`!! You need set env BOT_TOKEN`);
+ *   process.exit(1);
+ * }
+ *
+ * var b = new Bot(token);
+ *
+ * b.scenario(scenario);
+ * b.start();
+ *
+ * @constructor
+ */
 function Bot(token) {
   // composite
   this._tel_api = new BotApi(token);
@@ -29,6 +91,11 @@ function Bot(token) {
 }
 
 Bot.prototype = {
+  /**
+   * Setter/getter for scenario
+   * @param {Scenario} new_scenario
+   * @returns {this|Scenario}
+   */
   scenario (new_scenario) {
     if (_.isUndefined(new_scenario)) {
       return this._scenario;
@@ -37,6 +104,11 @@ Bot.prototype = {
     return this;
   },
 
+  /**
+   * Setter/getter time to live session. Default 30min.
+   * @param {Scenario} new_ttl
+   * @returns {this|Scenario}
+   */
   sessionTTL(new_ttl) {
     if (_.isUndefined(new_ttl)) {
       return this._ttl;
@@ -45,6 +117,11 @@ Bot.prototype = {
     return this;
   },
 
+  /**
+   * Setter/getter Session holder
+   * @param {object} new_stateholder
+   * @returns {this|object}
+   */
   stateHolder(new_stateholder) {
     if (_.isUndefined(new_stateholder)) {
       return this._state_holder;
@@ -53,6 +130,11 @@ Bot.prototype = {
     return this;
   },
 
+  /**
+   * Telegram api setter/getter
+   * @param {BotApi} new_botapi
+   * @returns {this|BotApi}
+   */
   telegramApi(new_botapi) {
     if (_.isUndefined(new_botapi))
       return this._tel_api;
@@ -60,10 +142,17 @@ Bot.prototype = {
     return this;
   },
 
+  /**
+   * return JobQueue
+   */
   jobQueue() {
     return this._job_queue;
   },
 
+  /**
+   * Start polling for telegram message.
+   * @throws {Error} if scenario not set before.
+   */
   start() {
     let scenario = this.scenario();
     if (_.isNull(scenario) ||
@@ -81,7 +170,7 @@ Bot.prototype = {
       while (! this._messages.length) {
         console.log('getUpdates..');
         let offset = this.offset +1,
-            updates = await this._tel_api.getUpdates(offset, 100, 1800);
+            updates = await this._tel_api.getUpdates(offset, 100, 60);
         this._messages = updates.result;
       }
 
@@ -176,6 +265,11 @@ Bot.prototype = {
     return state;
   },
 
+  /**
+   * Save user session and scenario path
+   * @param {string} user_id
+   * @param {object} context
+   */
   _saveUserSession: async function(user_id, context) {
     // save state
     var user_context = context.user_context,
@@ -212,9 +306,8 @@ Bot.prototype = {
   },
 
   /**
-   * Send to user activity type (typing, etc) if need
+   * Send to user activity type (typing, etc) if specified in scenario.
    * @param {object} context
-   * @returns {string|undefined} Result of "action" function
    */
   _sendActionMaybe: async function(context) {
     var telegram = this.telegramApi(),
@@ -232,7 +325,8 @@ Bot.prototype = {
    * Send to user activity type (typing, etc, if need)
    * and call "action" function of scenario
    * @param {object} context
-   * @returns {string|undefined} Result of "action" function
+   * @returns {string|undefined} Result of "action" function.
+   * Returned string indicate that "action" function was failed.
    */
   _callActionFun: async function(context) {
     var user_context = context.user_context,
@@ -268,12 +362,17 @@ Bot.prototype = {
     return menu;
   },
 
+  /**
+   * Check "goto" property of scenario and change context.path.
+   * If scenario is invalid set "/"
+   * @param {object} context
+   */
   _resolvePath: async function(context) {
     var scen_path = context.path,
         scenario = this._getScenario(context.path),
         user_context = context.user_context;
 
-    // return "/" or value of "goto" scenario field
+    // scenario.getGoto() return "/" or value of "goto" field of scenario
     let new_path = await scenario.getGoto(user_context);
 
     // concat if not absolute path
@@ -285,6 +384,10 @@ Bot.prototype = {
     context.path = this._getValidPath(new_path);
   },
 
+  /**
+   * Message processor, main logic here.
+   * @param {object} data
+   */
   _processMessage: async function(data) {
     var msg = data.message,
         text_msg = msg.text,
@@ -364,8 +467,6 @@ Bot.prototype = {
     }
 
     await this._saveUserSession(from_id, context);
-
-    console.log('path:',context.path);
   },
 
   _getScenario: function(path) {
