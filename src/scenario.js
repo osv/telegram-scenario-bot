@@ -85,11 +85,19 @@ function Scenario(api, scenario) {
         }
       },
       command = function(key_name, value) {
+        var seen_names = {};
         for(let command_name in value) {
           let sub_scenario = value[command_name];
 
           // nesting
           scenario_validator(`${key_name}."${command_name}"`, sub_scenario);
+
+          // check dup names
+          var name = sub_scenario.name;
+          if (_.has(seen_names, name)) {
+            throw Error(`"${key_name}" have scenarios with duplicated names: "${name}"`);
+          }
+          seen_names[name] = 1;
         }
       };
 

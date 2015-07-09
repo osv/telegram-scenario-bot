@@ -137,6 +137,18 @@ describe('Scenario class', function(){
 
       expect(() => { new Scenario({}, scenario2); })
         .to.throw('"[[root]].commands."/help".typing" must be boolean or function');
+
+      let scenario_dup_name = {
+        name: "root",
+        commands: {
+          c1: { name: "c1"},
+          c2: { name: "c1"}     // <- fail
+        }
+      };
+
+      expect(() => { new Scenario({}, scenario_dup_name); })
+        .to.throw('[[root]].commands" have scenarios with duplicated names: "c1"');
+
     });
   });
 
