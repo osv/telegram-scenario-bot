@@ -10,6 +10,8 @@ import path from 'path';
 
 const DEFAULT_SESSION_TTL = 30 * 60 * 1000;
 
+const DEFAULT_POLLING_TIMEOUT = 60; //1min
+
 /**
  * Create Telegram bot.
 
@@ -86,6 +88,7 @@ function Bot(token) {
   this._messages = [];
   this._offset = 0;
   this._ttl = DEFAULT_SESSION_TTL;
+  this._telegram_poll_t = DEFAULT_POLLING_TIMEOUT;
 
   this._user_reply_locks = {};  // store user id when worker started
 }
@@ -131,6 +134,19 @@ Bot.prototype = {
   },
 
   /**
+   * Setter/getter for timeout of telegram longpolling, default 1min.
+   * @param {number} timeout
+   * @returns {this|number}
+   */
+  telegramPollingTimout (timeout) {
+    if (_.isUndefined(timeout)) {
+      return this._telegram_poll_t;
+    }
+    this._telegram_poll_t = timeout;
+    return this;
+  },
+
+  /**
    * Telegram api setter/getter
    * @param {BotApi} new_botapi
    * @returns {this|BotApi}
@@ -170,7 +186,8 @@ Bot.prototype = {
       while (! this._messages.length) {
         console.log('getUpdates..');
         let offset = this.offset +1,
-            updates = await this._tel_api.getUpdates(offset, 100, 60);
+            timeout = this.telegramPollingTimout(),
+            updates = await this._tel_api.getUpdates(offset, 100, timeout);
         this._messages = updates.result;
       }
 
