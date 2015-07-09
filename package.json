@@ -1,7 +1,7 @@
 {
   "name": "telegram-scenario-bot",
   "version": "0.1.0",
-  "description": "Framework for Telegram bot",
+  "description": "Stateful, scenario based telegram bot, es7.",
   "main": "lib/index.js",
   "scripts": {
     "test": "gulp",
@@ -11,7 +11,9 @@
     "prepublish": "npm run build"
   },
   "keywords": [
-    "es6",
+    "es7",
+    "Telegram",
+    "bot",
     "node"
   ],
   "repository": {
