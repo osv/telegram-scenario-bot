@@ -10,7 +10,8 @@ import _ from 'underscore';
  * for throwing error.
  *
  * @example
- * let v2 = new Validator(api),
+ * let api = {someApiCall: () => {}},
+ *     v2 = new Validator(api),
  *     boolean = v2.boolean.bind(v2);
  * boolean('propname', true); // ok
  * boolean('propname', "<% someApiCall %>"); // ok
@@ -18,6 +19,7 @@ import _ from 'underscore';
  * boolean('propname', "XYZ<% someApiCall %>"); // fail because fun str may be "<% .. %>"
  *
  * @param {object} api - hash of known methods that may be used by "<% XYZ %>"
+ * @constructor
  */
 function Validator(api={}) {
   this.setApi(api);
