@@ -299,9 +299,8 @@ Bot.prototype = {
     };
 
     // check "commands" prop of scenario
-    if (! _.isUndefined(text_msg)) {
-      this._resolveScenario(context, text_msg);
-    }
+    this._resolveScenario(context, text_msg);
+
     // "before" property
     await this._getScenario(context.path).callBeforeFun(user_context);
 
