@@ -90,6 +90,9 @@ function Bot(token) {
   this._ttl = DEFAULT_SESSION_TTL;
   this._telegram_poll_t = DEFAULT_POLLING_TIMEOUT;
 
+  // Cache scenario by path. key - path, value ScenarioWrapper scenario
+  this._scenario_cache = {};
+
   this._user_reply_locks = {};  // store user id when worker started
 }
 
@@ -104,6 +107,8 @@ Bot.prototype = {
       return this._scenario;
     }
     this._scenario = new_scenario;
+    // clear cache
+    this._scenario_cache = {};
     return this;
   },
 
@@ -487,8 +492,15 @@ Bot.prototype = {
   },
 
   _getScenario: function(path) {
-    var s = this.scenario();
-    return s.getScenario(path);
+    var cache = this._scenario_cache;
+
+    if (! _.has(cache, path)) {
+      let s = this.scenario();
+      let resolved = s.getScenario(path);
+      cache[path] = resolved;
+    }
+
+    return cache[path];
   },
 
   // check if exist path, if no, return '/' otherwise return path
