@@ -350,8 +350,8 @@ describe('Scenario wrapper', function() {
           '/start': {
             commands: {
               '.': {name: 'default'},
-              '/print': {name: 'print'},
-              '/list': {name: 'list'},
+              '/print|печать': {name: 'print'},
+              '/list|список': {name: 'list'},
             }
           },
           '/audio': {
@@ -389,6 +389,18 @@ describe('Scenario wrapper', function() {
 
       expect(default_w, '"foo bar" matched by "." pattern').to.be.an.instanceof(ScenarioWrapper);
       default_w.getName().should.be.equal('default');
+    });
+
+    it('should utf8 match too', function() {
+      let scenario = this.scenario,
+          s = new ScenarioWrapper({}, scenario),
+          unknown_w = s.getNextScenario('/quit'),
+          start_w = s.getNextScenario('/start');
+
+      let utf_8_list = start_w.getNextScenario('список');
+
+      expect(utf_8_list, 'список').to.be.an.instanceof(ScenarioWrapper);
+      utf_8_list.getName().should.be.equal('list');
     });
 
     it('should "." match last', function() {
