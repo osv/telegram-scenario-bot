@@ -4,6 +4,8 @@ Stateful, scenario based telegram bot.
 
 ## SYNOPSIS
 
+One example bot is online, Add [@Tsb_bot](http://telegram.me/Tsb_bot) bot to your Telegram
+
 [![Build Status][travis-image]][travis-url]
 [![Coveralls Status][coveralls-image]][coveralls-url]
 
@@ -227,13 +229,14 @@ Root scenario name may be omitted.
 ### this context of api callback
 
 ```js
+// currently context created when processing message
 {
       // fast accesors to telegram message field
       text: text,
       from: from,
       chat: chat,
 
-      // telegram message
+      // full telegram message
       message: data,
 
       stash: {},
@@ -260,7 +263,7 @@ fooAction: async function() {
 - `sessionTTL(ttl)` - Setter/getter time to live session. Default 30min.
 - `stateHolder(new_stateholder)` - Setter/getter Session holder
 - `telegramPollingTimout(timeout)` - Setter/getter for timeout of telegram longpolling, default 1min.
-- `jobQueue()` - get job queue. Example: `bot.jobQueue.maxConcurentJobs(8)`
+- `jobQueue()` - get job queue. Example: `bot.jobQueue().maxConcurentJobs(8)`
 - `start()` - start polling
 
 ## TODO
@@ -268,6 +271,7 @@ fooAction: async function() {
 - [ ] Write test for bot core behavior. Don't look for 100% coverage, it covered only scenario validator. Behavior still is subject of change.
 - [ ] Sugar for single line commands "/google foo bar".
 - [ ] Test group chat
+- [ ] Ignore messages that send before bot start. Ignore message that have timestamp < timestamp of end processing message for same user.
 
 [travis-url]: https://travis-ci.org/osv/telegram-scenario-bot
 [travis-image]: http://img.shields.io/travis/osv/telegram-scenario-bot.svg
