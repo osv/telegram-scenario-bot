@@ -143,3 +143,4 @@ var b = new Bot(token);
 
 b.scenario(bot_scenario);
 b.start();
+console.log('Started');

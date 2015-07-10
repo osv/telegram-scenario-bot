@@ -189,7 +189,6 @@ Bot.prototype = {
   _poller: async function() {
     while (1) {
       while (! this._messages.length) {
-        console.log('getUpdates..');
         let offset = this.offset +1,
             timeout = this.telegramPollingTimout(),
             updates = await this._tel_api.getUpdates(offset, 100, timeout);
@@ -418,7 +417,7 @@ Bot.prototype = {
         chat = msg.chat,
         chat_id = chat.id,
         telegram = this.telegramApi();
-    console.log(data);
+    console.log('New message', data); //TODO: optional debug
 
     //TODO: there may be other types of message, maybe need ignore non text message by default
 
