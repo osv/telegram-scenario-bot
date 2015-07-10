@@ -1,8 +1,11 @@
 {
   "name": "telegram-scenario-bot",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Stateful, scenario based telegram bot, es7.",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "gulp",
     "build": "gulp build",

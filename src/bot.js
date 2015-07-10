@@ -408,7 +408,7 @@ Bot.prototype = {
 
   /**
    * Message processor, main logic here.
-   * @param {object} data
+   * @param {object} data - telegram message
    */
   _processMessage: async function(data) {
     var msg = data.message,
