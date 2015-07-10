@@ -63,6 +63,7 @@ var script = {
       commands: {
         ".": {
           name: "searchResult",
+          typing: true,          // we use external service, it may take some time
           action: search,
           reply: function() { return this.stash.result; }
         }

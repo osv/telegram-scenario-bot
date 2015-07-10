@@ -19,8 +19,13 @@ const scenarioApi = {
 
   doCalculate() {
     var text = this.text,
+        // we may store to session. Session clear when enter to root scenario
         session = this.session,
         as_number = Number(text);
+
+    if (_.isString(text) && ! text.match(/^[ 0-9.+*/=-]+$/)) {
+      return 'Enter numbers, or operation "+-*/="';
+    }
 
     if (! _.isNaN(as_number) || text === '.') {
       session.acc = (session.acc || '') + text;
@@ -53,4 +58,5 @@ if (!token) {
 var b = new Bot(token);
 
 b.scenario(bot_scenario);
+b.telegramPollingTimout(1000);
 b.start();

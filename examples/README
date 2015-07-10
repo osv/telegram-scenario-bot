@@ -1,3 +1,7 @@
 Usage:
 
 BOT_TOKEN=123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ./gamemenu/run.sh
+
+* google - async demo
+* calculator - example from readme
+* gamemenu - complex menu demo
