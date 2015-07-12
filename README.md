@@ -167,16 +167,16 @@ Where:
 - type **boolean**, **number**, **fun**, only one `<% %>`.
 
 * **typing**, **uploading_document**, etc - Use this when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less.
-* **reply** - Send text message. You may random select one from from set, delimited by `\n={2,}\n`:
+* **reply** - Send text message. You may random select one from set, delimited by `\n={2,}\n`:
 ```
 reply: |
   Hello <% username %>
   ===================
-  Greetig <% username %>
+  Greeting <% username %>
   ===================
   Wellcome back, <% username %>
 ```
-After select `<% %>` will be applied to text.
+When one reply selected than calculate `<% %>`.
 
 * **menu** - Telegram custom keyboard:
 
@@ -204,22 +204,21 @@ Root scenario name may be omitted.
   reply: "Now post audio file. I upload it to server. Type /cancel to cancel."
   commands: {
     ".": {
-       name: "process-data",    // this route expect user send audio message, if no, send errror
-       action: function() {
-           let telegram_message = this.message,
-               audio = telegram_message.message.audio;
-           if (_.isUndefined(audio)) {
-              return 'You should send audio message'
-           }
-           // process audio...
-       },
-       reply: "Thanks, audio file successful upploaded to server"
+      name: "process-data",    // this route expect user send audio message, if no, send errror 
+      action: function() {
+        let telegram_message = this.message,
+            audio = telegram_message.message.audio;
+        if (_.isUndefined(audio)) {
+          return 'You should send audio message'
+        }
+        // process audio... 
+      },
+      reply: "Thanks, audio file successful upploaded to server"
     }
-  },
-  "cancel": {
-    name: "cancel"
-  },
-
+    "cancel": {
+      name: "cancel"
+    },
+  },  
 }
 ```
 * **before** callback, good for preparing stash with your model data.
@@ -268,7 +267,7 @@ fooAction: async function() {
 
 ## TODO
 
-- [ ] Write test for bot core behavior. Don't look for 100% coverage, it covered only scenario validator. Behavior still is subject of change.
+- [ ] Write test for bot core behavior. Currently covered only scenario validator. Behavior still is subject of change.
 - [ ] Sugar for single line commands "/google foo bar".
 - [ ] Test group chat
 - [ ] Ignore messages that send before bot start. Ignore message that have timestamp < timestamp of end processing message for same user.
