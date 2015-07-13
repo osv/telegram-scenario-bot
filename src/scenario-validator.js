@@ -26,6 +26,8 @@ function Validator(api={}) {
 }
 
 Validator.prototype = {
+  constructor: Validator,
+
   setApi(api) {
     this.api = api;
   },

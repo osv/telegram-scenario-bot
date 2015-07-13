@@ -62,6 +62,8 @@ function JobQueue() {
 }
 
 JobQueue.prototype = {
+  constructor: JobQueue,
+
   /**
    * Suspend littlebit before next poll, usually if got error when poller called
    */

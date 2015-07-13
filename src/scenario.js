@@ -98,6 +98,8 @@ function Scenario(api, scenario) {
 }
 
 Scenario.prototype = {
+  constructor: Scenario,        // re-define the constructor
+
   /**
    * Set or get api. If set, return this
    * @param {object} [new_api]

@@ -97,6 +97,8 @@ function Bot(token) {
 }
 
 Bot.prototype = {
+  constructor: Bot,             // re-define the constructor
+
   /**
    * Setter/getter for scenario
    * @param {Scenario} new_scenario

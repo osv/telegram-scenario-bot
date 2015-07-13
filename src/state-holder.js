@@ -17,6 +17,8 @@ function StateHolder(ttl) {
 }
 
 StateHolder.prototype = {
+  constructor: StateHolder,
+
   /**
    * Put state
    * @param {string} id chat identifier

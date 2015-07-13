@@ -17,6 +17,8 @@ function ScenarioWrapper(api, scenario) {
 }
 
 ScenarioWrapper.prototype = {
+  constructor: ScenarioWrapper,
+
   getScenario() {
     return this._scenario;
   },
