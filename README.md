@@ -188,7 +188,7 @@ menu: |
 # as array of array
 menu:
   - [yes, no]
-  - cancel
+  - [cancel]
 # you may use callbacks that return menu markup
 menu: |
   <% lastSelected %>
