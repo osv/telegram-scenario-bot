@@ -8,6 +8,11 @@ import Scenario from './scenario.js';
 import _ from 'underscore';
 import path from 'path';
 
+import Debug from 'debug';
+
+let debug = new Debug('telegram-scenario-bot:bot'),
+    error = new Debug('telegram-scenario-bot:bot:error');
+
 const DEFAULT_SESSION_TTL = 30 * 60 * 1000;
 
 const DEFAULT_POLLING_TIMEOUT = 60; //1min
@@ -182,6 +187,7 @@ Bot.prototype = {
         ! scenario instanceof Scenario) {
       throw Error('You must set scenario before start()');
     }
+    debug('Start bot');
     this.jobQueue().start();
   },
 
@@ -205,10 +211,11 @@ Bot.prototype = {
       this.offset = update_id;
 
       if (this._is_locked_user(from_id)) {
-        console.log(`user is still locked, skip this message ${from_id}`, this._user_reply_locks);
+        debug(`User is still locked, skip this message from ${from_id}`);
         continue;
       }
 
+      debug('New message', msg);
       return msg;
     }
   },
@@ -229,10 +236,10 @@ Bot.prototype = {
     } catch (err) {
       let state_holder = this.stateHolder(),
           user_state = await state_holder.get(from_id);
-      console.log(`Error while processing message.\n`,
-                  'Message:',  msg, '\n',
-                  'User state:', user_state, '\n',
-                  `\nTrace: ${err.stack}`);
+      error('Processing message.',
+            '\nMessage:',  msg, '\n',
+            'User state:', user_state,
+            `\nTrace: ${err.stack}`);
     }
     this._unlock_user(from_id);
   },
@@ -419,7 +426,6 @@ Bot.prototype = {
         chat = msg.chat,
         chat_id = chat.id,
         telegram = this.telegramApi();
-    console.log('New message', data); //TODO: optional debug
 
     //TODO: there may be other types of message, maybe need ignore non text message by default
 
@@ -513,7 +519,7 @@ Bot.prototype = {
       res = path;
     } catch(e) {
       res = '/';
-      console.trace(`!! Scenario use invalid path: "${path}". Fallback to "/"\n`);
+      error(`Scenario use invalid path: "${path}". Fallback to "/"`);
     }
     return res;
   },

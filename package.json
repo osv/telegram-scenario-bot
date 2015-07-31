@@ -48,6 +48,7 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
+    "debug": "^2.2.0",
     "es6-promisify": "^2.0.0",
     "memory-cache": "^0.1.4",
     "teleapiwrapper": "^0.9.3",
