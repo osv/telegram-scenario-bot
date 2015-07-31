@@ -4,6 +4,8 @@
 
 var _ = require ('underscore');
 
+var debug = require('debug')('telegram-scenario-bot:job-queue');
+
 const MAX_CONCURENT_JOB = 2;
 const MAX_POLL_DELAY    = 60000;
 
@@ -172,7 +174,6 @@ JobQueue.prototype = {
     // non-blocking get next job
     var job_data;
     try {
-
       job_data = await this._callPoller();
       this._clearPollDelay();
 
@@ -184,13 +185,13 @@ JobQueue.prototype = {
           try {
             await self._callWorker(data);
           } catch (e) {
-            console.log(e);
+            debug(e);
           }
           self._current_jobs--;
         };
       })(job_data));
     } catch (error) {
-      console.warn('Polling ' + error);
+      debug('Polling ' + error);
       this._addPollDelay();
     }
 
