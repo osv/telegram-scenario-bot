@@ -97,6 +97,8 @@ function Bot(token) {
 
   // Cache scenario by path. key - path, value ScenarioWrapper scenario
   this._scenario_cache = {};
+  // Cache of commands by path
+  this._commands_cache = {};
 
   this._user_reply_locks = {};  // store user id when worker started
 }
@@ -114,8 +116,9 @@ Bot.prototype = {
       return this._scenario;
     }
     this._scenario = new_scenario;
-    // clear cache
+    // clear caches
     this._scenario_cache = {};
+    this._commands_cache = {};
     return this;
   },
 
@@ -548,9 +551,15 @@ Bot.prototype = {
    * Return scenario's command by path
    */
   _getScenarioCommand: function(path) {
-    let s = this.scenario(),
-    resolved = s.getScenarioCommand(path);
-    return resolved;
+    var cache = this._commands_cache;
+
+    if (! _.has(cache, path)) {
+      let s = this.scenario();
+      let resolved = s.getScenarioCommand(path);
+      cache[path] = resolved;
+    }
+
+    return cache[path];
   },
 
   // check if exist path, if no, return '/' otherwise return path
