@@ -36,7 +36,9 @@ scenario:
         This example imitate game settings.
 
         Source can be found https://github.com/osv/telegram-bot
-    /v|video:
+
+        This demo support command chaining
+    ^/video|^v:
       name: video
       reply: |
         Video settings
@@ -46,10 +48,11 @@ scenario:
       menu: |
         /resolution
         /back || /cancel
+      chain: true               # allow "/video /resolution" chain
       commands:
         /cancel|cancel: *CANCEL
         /back|back: *BACK
-        /resolution|res:
+        ^/resolution|res:
           name: resolution
           before: <% setupStash %>
           reply: |
@@ -58,6 +61,7 @@ scenario:
           menu: |
             <% listKnownResolution %>
             /back || /cancel
+          chain: true
           commands:
             /cancel|cancel: *CANCEL
             /back|back: *BACK
@@ -66,7 +70,7 @@ scenario:
               before: <% setupStash %>
               action: <% setVideoResolution %>
               reply: "Resolution set to <% currentResolution %> ✅"
-    /a|audio:
+    ^/audio|^a:
       name: audio
       before: <% setupStash %>
       reply: |
@@ -79,14 +83,16 @@ scenario:
         /music
         /ambient
         /back || /cancel
+      chain: true
       commands:
-        /music|music:
+        ^/music|^m:
           name: music
           before: <% setupStash %>
           reply: |
             Current music level is <% currentMusicLvl %>%
             Enter new level
           menu: *NUMBER_SELECT
+          chain: true
           commands:
             /cancel|cancel: *CANCEL
             /back|back: *BACK
@@ -98,13 +104,14 @@ scenario:
               # current is /audio/music/set-music-level
               # goto '/audio'. You may use 'goto: /audio' instead
               goto: /audio
-        /ambient|ambient:
+        ^/ambient|^a:
           name: ambient
           before: <% setupStash %>
           reply: |
             Current ambient level is <% currentAmbientLvl %>%
             Enter new level
           menu: *NUMBER_SELECT
+          chain: true
           commands:
             /cancel|cancel: *CANCEL
             /back|back: *BACK
@@ -112,7 +119,7 @@ scenario:
               name: set-ambient-level
               before: <% setupStash %>
               action: <% setAmbientLvl %>
-              reply: "Music level set to <% currentAmbientLvl %>% ✅"
+              reply: "Ambient level set to <% currentAmbientLvl %>% ✅"
               # current is /audio/music/set-music-level
               # goto '/audio'. You may use 'goto: /audio' instead
               goto: /audio

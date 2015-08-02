@@ -60,6 +60,7 @@ var script = {
     "/google|g": {
       name: 'google',
       reply: "Enter search query?",
+      chain: true,
       commands: {
         ".": {
           name: "searchResult",
