@@ -76,6 +76,8 @@ function Scenario(api, scenario) {
 
     ttl                : number, // time to live of session
 
+    chain              : boolean, // allow chaining this command
+
     before             : fun,   // called before  all, you may  use it
                                 // to   prepare   stash,   to   deduce
                                 // database operation

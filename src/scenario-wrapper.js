@@ -186,6 +186,20 @@ ScenarioWrapper.prototype = {
   },
 
   /**
+   * Return 'chain' property of scenario. Chain allow multiple command in single user request
+   * @param {object} context - this for callbacks
+   * @param {array} args - arguments for callbacks
+   * @returns {boolean}
+   */
+  isChainable: async function(context, args) {
+    let scenario = this.getScenario(),
+        chain_value = scenario.chain,
+        result = await this._asBoolean(chain_value, context, args);
+
+    return !!result;
+  },
+
+  /**
    * Call scenario "before" function. It usually called at early stage of processing message
    * @param {object} context - this for callbacks
    * @param {array} args - arguments for callbacks

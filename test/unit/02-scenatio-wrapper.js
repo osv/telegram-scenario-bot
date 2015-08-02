@@ -237,6 +237,23 @@ item3` })
     });
   });
 
+  describe('isChainable(), property "chain"', function() {
+    it('should return false if not exist', function() {
+      return new ScenarioWrapper({}, {})
+        .isChainable().should.eventually.eql(false);
+    });
+
+    it('should return value of "chain"', function() {
+      return new ScenarioWrapper({}, { chain: true })
+        .isChainable().should.eventually.eql(true);
+    });
+
+    it('should support async function', function() {
+      return new ScenarioWrapper({}, { chain: async function() { return false; } })
+        .isChainable().should.eventually.eql(false);
+    });
+  });
+
   describe('Promise and async as callback in api', function() {
     before(function() {
       // simple sleep promise and resolve return msg
