@@ -44,14 +44,37 @@ scenario:
         Video settings
 
         /resolution - setup resolution
+        /quality - set quality
         Use /cancel for cancel; /back return
       menu: |
         /resolution
+        /quality
         /back || /cancel
       chain: true               # allow "/video /resolution" chain
       commands:
         /cancel|cancel: *CANCEL
         /back|back: *BACK
+        ^/quality:
+          name: quality-setting
+          before: <% setupStash %>
+          menu: |
+            hi || middle || low
+            /back   ||  /cancel
+          reply: |
+            Current quality is "<% currentQuality %>"
+            Enter new quality
+          chain: true
+          commands:
+            /cancel|cancel: *CANCEL
+            /back|back: *BACK
+            ^low$|^middle$|^hi$:
+              name: low
+              reply: Quality saved
+              action: <% satQuality %>
+            .:
+              name: default
+              reply: Invalide quality. Type "hi", "middle" or "low"
+              goto: ..          # go back
         ^/resolution|res:
           name: resolution
           before: <% setupStash %>
@@ -70,6 +93,7 @@ scenario:
               before: <% setupStash %>
               action: <% setVideoResolution %>
               reply: "Resolution set to <% currentResolution %> ✅"
+
     ^/audio|^a:
       name: audio
       before: <% setupStash %>
