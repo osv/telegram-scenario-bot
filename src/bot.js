@@ -386,6 +386,19 @@ Bot.prototype = {
   },
 
   /**
+   * Call "before" function of scenario
+   *
+   * @param {object} context
+   */
+  _callBeforeFun: async function(context) {
+    var user_context = context.user_context,
+        scenario = this._getScenario(context.path);
+
+    // call 'action' function
+    var action_error_message = await scenario.callBeforeFun(user_context);
+  },
+
+  /**
    * Return scenario menu.
    * @param {object} context
    * @returns {object|null} Telegram custom keyboard object if scenario "menu" not defined
@@ -460,7 +473,7 @@ Bot.prototype = {
     await this._resolveScenario(context);
 
     // "before" property
-    await this._getScenario(context.path).callBeforeFun(user_context);
+    await this._callBeforeFun(context);
 
     // send bot action: typing, upload_photo, etc
     await this._sendActionMaybe(context);
@@ -491,7 +504,7 @@ Bot.prototype = {
     // if we changed scenario, call "before" function for new scenario for this one
     // and maybe get reply
     if (current_path !== context.path) {
-      await this._getScenario(context.path).callBeforeFun(user_context);
+      await this._callBeforeFun(context);
 
       // if we change scenario, we may try again get reply message
       if (! _.isString(reply_msg) && ! _.isUndefined(text_msg)) {
