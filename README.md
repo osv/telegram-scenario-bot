@@ -290,7 +290,8 @@ fooAction: async function() {
 ## TODO
 
 - [ ] Write test for bot core behavior. Currently covered only scenario validator. Behavior still is subject of change.
-- [ ] Sugar for single line commands "/google foo bar".
+- [X] Sugar for single line commands "/google foo bar".
+- [ ] Write acceptance library for test scenario behavior.
 - [ ] Test group chat
 - [ ] Ignore messages that send before bot start. Ignore message that have timestamp < timestamp of end processing message for same user.
 
