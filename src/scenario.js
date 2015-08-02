@@ -162,17 +162,46 @@ Scenario.prototype = {
    * //  }
    *
    * s.getScenario('/myscen/fail-command'); // throw
-
    */
   getScenario(path) {
     let api = this.api(),
-        scenario = this._getScenario(path)
+        scenario = this._getScenario(path).scenario;
+
     return new ScenarioWrapper(api, scenario);
   },
 
+  /**
+   * Get scenario command regexp by path
+   * @param {string} path
+   * @throws {Error} if not found scenario
+   * @return {ScenarioWrapper}
+   * @example
+   * var s = new Scenario({}, {
+   *   name: 'myscen',
+   *   commands: {
+   *     '/start': {
+   *     name: 'start-command'
+   *     }
+   *   }
+   * })
+   *
+   * s.getScenario();                 // undefined
+   * s.getScenario('/');              // undefined
+   * s.getScenario('/start-command'); // "/start"
+   * s.getScenario('/foo');           // throw
+   */
+  getScenarioCommand(path) {
+    return this._getScenario(path).command;
+
+  },
+
+  /**
+   * Get scenario
+   * @return {{command: string, scenario: ScenarioWrapper}}
+   */
   _getScenario(path) {
     if (_.isUndefined(path)) {
-      return this._scenario;
+      return {scenario: this._scenario};
     }
 
     let root_name = this._scenario.name,
@@ -183,6 +212,7 @@ Scenario.prototype = {
 
     let frags = path.split('/'),
         cur_path = '/' + root_name,
+        last_command,
         scenario = this._scenario;
 
     for(let next_name of frags) {
@@ -195,7 +225,10 @@ Scenario.prototype = {
         for (let command_name in scenario.commands) {
           let command = scenario.commands[command_name],
               cmd_name = command.name;
+
           if (cmd_name === next_name) {
+
+            last_command = command_name;
 
             // ok, found, continue for next scen name
             cur_path += '/' + cmd_name;
@@ -209,9 +242,10 @@ Scenario.prototype = {
       if (! found) {
         throw Error(`Cannot find scenario: "${next_name}" in "${cur_path}"`);
       }
+
     }
 
-    return scenario;
+    return {scenario: scenario, command: last_command};
   }
 };
 

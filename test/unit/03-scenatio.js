@@ -236,6 +236,14 @@ describe('Scenario class', function(){
       expect(s.getScenario).bind(s).called('/root/quit-force/bar')
         .to.throw('Cannot find scenario: "bar" in "/root/quit-force"');
     });
+
+    it('getScenarioCommand(path), should return regexp command path',function() {
+      let s = this.scenario;
+
+      s.getScenarioCommand('/root/quit').should.be.equal('/quit');
+      expect( s.getScenarioCommand('/') ).to.be.an('undefined');
+    });
+
   });
 
 });
