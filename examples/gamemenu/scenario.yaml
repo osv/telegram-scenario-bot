@@ -37,7 +37,8 @@ scenario:
 
         Source can be found https://github.com/osv/telegram-bot
 
-        This demo support command chaining
+        This demo support command chaining, i.e you may run "/video/quality hi" or
+        "/audio/music 80" to skip wizard interface
     ^/video|^v:
       name: video
       reply: |
