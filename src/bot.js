@@ -320,18 +320,36 @@ Bot.prototype = {
    *
    * Modify context.path or leave as is if this scenario not match any item in "commands"
    * @param {object} context
-   * @param {string} text user message text
    */
-  _resolveScenario: function(context, text) {
+  _resolveScenario: async function(context) {
     var scen_path = context.path,
+        user_context = context.user_context,
         current_scen = this._getScenario(scen_path),
 
         // match message text, and try find next sub scenario
-        next_scen = current_scen.getNextScenario(text);
+        next_scen = current_scen.getNextScenario(user_context.text);
 
     // if not found sub scenario, keep current scenario
     if (next_scen !== null) {
       context.path  += '/' + next_scen.getName();
+
+      var is_chainable = await next_scen.isChainable();
+
+      if (is_chainable) {
+        let cmd = this._getScenarioCommand(context.path),
+            cmd_regexp = new RegExp(cmd);
+
+        if (! _.isUndefined(cmd)) {
+          user_context.text = user_context.text.replace(cmd_regexp, '').trim();
+
+          if (user_context.text !== '') {
+            let scen_name = next_scen.getName();
+
+            debug(`chaining scenario "${scen_name}" with command "${user_context.text}"`);
+            await this._resolveScenario(context);
+          }
+        }
+      }
     }
   },
 
@@ -439,7 +457,7 @@ Bot.prototype = {
     };
 
     // check "commands" prop of scenario
-    this._resolveScenario(context, text_msg);
+    await this._resolveScenario(context);
 
     // "before" property
     await this._getScenario(context.path).callBeforeFun(user_context);
@@ -498,6 +516,9 @@ Bot.prototype = {
     await this._saveUserSession(from_id, context);
   },
 
+  /**
+   * Return scenario by path
+   */
   _getScenario: function(path) {
     var cache = this._scenario_cache;
 
@@ -508,6 +529,15 @@ Bot.prototype = {
     }
 
     return cache[path];
+  },
+
+  /**
+   * Return scenario's command by path
+   */
+  _getScenarioCommand: function(path) {
+    let s = this.scenario(),
+    resolved = s.getScenarioCommand(path);
+    return resolved;
   },
 
   // check if exist path, if no, return '/' otherwise return path
