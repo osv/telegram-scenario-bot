@@ -26,7 +26,8 @@ const scenarioApi = {
         data = db[user_id] || {
           music: 100,
           ambient: 100,
-          resolution: '1600x900'
+          resolution: '1600x900',
+          quality: 'middle'
         };
 
     db[user_id] = this.stash.data = data;
@@ -116,6 +117,18 @@ const scenarioApi = {
       }
     }
     return null;
+  },
+
+  currentQuality() {
+    var data = this.stash.data;
+    return '' + data.quality;
+  },
+
+  satQuality() {
+    var user_id = this.from.id,
+        user_input = this.text;
+
+    db[user_id].quality = user_input;
   },
 
   username() {
