@@ -287,6 +287,10 @@ fooAction: async function() {
 - `jobQueue()` - get job queue. Example: `bot.jobQueue().maxConcurentJobs(8)`
 - `start()` - start polling
 
+## DEBUG
+
+Set env DEBUG=telegram-scenario-bot:*
+
 ## TODO
 
 - [ ] Write test for bot core behavior. Currently covered only scenario validator. Behavior still is subject of change.
