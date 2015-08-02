@@ -319,7 +319,9 @@ Bot.prototype = {
   },
 
   /**
-   * Select next scenario based on text.
+   * Select next scenario based on text and call 'before' function.
+   * If Selected scenario is chainable, remove from this text current command
+   * and recursive resolve scenario.
    *
    * Modify context.path or leave as is if this scenario not match any item in "commands"
    * @param {object} context
@@ -348,12 +350,19 @@ Bot.prototype = {
           if (user_context.text !== '') {
             let scen_name = next_scen.getName();
 
+            // need run 'before' function before chain
+            await this._callBeforeFun(context);
+
             debug(`chaining scenario "${scen_name}" with command "${user_context.text}"`);
+
             await this._resolveScenario(context);
           }
         }
       }
     }
+
+    // done chain, call before
+    await this._callBeforeFun(context);
   },
 
   /**
@@ -474,9 +483,6 @@ Bot.prototype = {
 
     // check "commands" prop of scenario
     await this._resolveScenario(context);
-
-    // "before" property
-    await this._callBeforeFun(context);
 
     // send bot action: typing, upload_photo, etc
     await this._sendActionMaybe(context);
