@@ -60,7 +60,7 @@ var script = {
     "/google|g": {
       name: 'google',
       reply: "Enter search query?",
-      chain: true,
+      chain: true,              // allow run /google foo bar
       commands: {
         ".": {
           name: "searchResult",

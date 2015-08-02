@@ -148,6 +148,8 @@ Full scenario spec:
 
     ttl                : number, // time to live of session
 
+    chain              : boolean, // allow chaining this command
+
     before             : fun,   // called before  all, you may  use it
                                 // to   prepare   stash,   to   deduce
                                 // database operation
@@ -197,6 +199,26 @@ menu: |
 ```
 * **goto** - if no "goto" property and this is a leaf of scenario, than it will go to root scenario ("/").
 Root scenario name may be omitted.
+
+* **chain** - set to true for chaining commands. Default false. For example you have:
+```yaml
+scenario:
+  # ...
+  commands:
+    ^/video:
+      chain: true
+      # ...
+      commands:
+        # ...
+        ^/quality:
+```
+This example allow to user type command `/video /quality` or `/video/quality` (spaces are trimmed).
+This may be usefull if you want allow user to skip some interactive interfaces and run single command.
+
+Let say you have command `/google`,
+**chain** allow pass query text it in single command (ex: `/google foo bar`),
+before next scenario is resolved, **before** function called and removed matched command name from user input text (so text `foo bar` passed to sub-scenario).
+See "examples/google".
 * **commands**  object where key is command/work pattern and value is next scenario. If you use yaml, good to use ancors here to remove nesting. Try use regexp pattern that does not depend on the sequence of hash keys. Key "." is special, and is guaranteed to be last match check. "." matched even this is not text message but photo, audio upload, etc.
 ```js
 {
